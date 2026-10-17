@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E7C4"/>
+      <stop offset="50%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#8E6D2F"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#24211D"/>
+      <stop offset="100%" stop-color="#151311"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Ring Ornament -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#goldGrad)" stroke-width="4" stroke-dasharray="8 6" opacity="0.6"/>
+  <circle cx="256" cy="256" r="195" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+
+  <!-- Interlocking Wedding Rings Accent at Top -->
+  <g transform="translate(256, 150)" stroke="url(#goldGrad)" stroke-width="5" fill="none">
+    <circle cx="-16" cy="0" r="24"/>
+    <circle cx="16" cy="0" r="24"/>
+    <!-- Small Diamond Sparkle -->
+    <polygon points="-16,-26 -12,-32 -16,-38 -20,-32" fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Monogram Letters: A & A -->
+  <text x="256" y="295" font-family="'Playfair Display', Georgia, serif" font-size="110" font-weight="700" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="4">A&amp;A</text>
+
+  <!-- Subtitle -->
+  <text x="256" y="345" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="20" font-weight="600" fill="#E2DBD0" text-anchor="middle" letter-spacing="6">THE WEDDING</text>
+  <text x="256" y="375" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="14" font-weight="400" fill="#C5A059" text-anchor="middle" letter-spacing="4">ARYA &amp; ANNISA</text>
+</svg>

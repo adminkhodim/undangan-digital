@@ -1,0 +1,26 @@
+{
+  "name": "The Wedding of Arya & Annisa",
+  "short_name": "Arya & Annisa",
+  "description": "Undangan Pernikahan Digital Raden Arya Pratama & Annisa Larasati Putri",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#C5A059",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    {
+      "src": "assets/images/pwa-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/couple_hero.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Portal Editor Undangan Digital - Admin Dashboard</title>
+  <meta name="description" content="Portal khusus untuk mengedit isi, foto, tanggal, rekening, dan mengelola tamu undangan digital pernikahan.">
+  <meta name="theme-color" content="#9C7A3C">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Admin Undangan">
+  <link rel="icon" type="image/svg+xml" href="assets/images/pwa-icon.svg">
+  <link rel="apple-touch-icon" href="assets/images/pwa-icon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Admin Stylesheet -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       TOP NAVBAR
+       ==================================================================== -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <button type="button" id="btn-toggle-sidebar" class="btn-hamburger" title="Buka Menu Navigasi" aria-label="Buka Menu Navigasi">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <div class="brand-text-wrap">
+          <h1 class="brand-title">Portal Editor</h1>
+          <div class="brand-subtitle">Kelola Isi, Acara, Rekening & Buku Tamu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="index.html" target="_blank" class="btn btn-secondary" title="Buka Undangan di Tab Baru">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        <span class="btn-text">Pratinjau</span>
+      </a>
+      <button type="button" id="btn-download-config" class="btn btn-outline-primary" title="Unduh Berkas config.js">
+        <i class="fa-solid fa-download"></i>
+        <span class="btn-text">Unduh</span>
+      </button>
+      <button type="button" id="btn-save-all" class="btn btn-primary" title="Simpan Perubahan">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>Simpan</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       MOBILE ACTIVE TAB BAR (QUICK NAVIGATOR & MENU TRIGGER)
+       ==================================================================== -->
+  <div class="mobile-section-bar">
+    <button type="button" class="mobile-nav-btn prev" id="mobile-nav-prev" title="Bagian Sebelumnya" aria-label="Bagian Sebelumnya">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button type="button" class="mobile-current-tab-trigger" id="mobile-current-tab-trigger" title="Ketuk untuk membuka menu navigasi lengkap">
+      <div class="mobile-tab-category" id="mobile-tab-category">Pengaturan Konten</div>
+      <div class="mobile-tab-title-line">
+        <i id="mobile-tab-icon" class="fa-solid fa-user-group text-primary"></i>
+        <span class="mobile-tab-title" id="mobile-tab-title">Data Mempelai</span>
+        <span class="mobile-tab-step-badge" id="mobile-tab-step">1 / 9</span>
+        <i class="fa-solid fa-chevron-down mobile-caret"></i>
+      </div>
+    </button>
+    <button type="button" class="mobile-nav-btn next" id="mobile-nav-next" title="Bagian Selanjutnya" aria-label="Bagian Selanjutnya">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <!-- BACKDROP UNTUK DRAWER MOBILE -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+  <!-- ====================================================================
+       MAIN LAYOUT
+       ==================================================================== -->
+  <div class="admin-layout">
+    
+    <!-- SIDEBAR NAVIGATION (DESKTOP SIDEBAR / MOBILE DRAWER) -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-mobile-header">
+        <div class="sidebar-mobile-title-wrap">
+          <div class="brand-icon-sm">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <div>
+            <div class="sidebar-drawer-title">Menu Portal Editor</div>
+            <div class="sidebar-drawer-sub">Pilih bagian yang ingin diedit</div>
+          </div>
+        </div>
+        <button type="button" id="btn-close-sidebar" class="btn-close-sidebar" aria-label="Tutup Menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-scrollable-content">
+        <div class="sidebar-heading">Pengaturan Konten</div>
+        <button type="button" class="nav-tab-btn active" data-tab="tab-mempelai" data-category="Pengaturan Konten" data-title="Data Mempelai" data-icon="fa-user-group" data-step="1 / 9">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Data Mempelai</span>
+          <span class="tab-index-badge">1</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-ayat" data-category="Pengaturan Konten" data-title="Doa & Ayat Suci" data-icon="fa-book-quran" data-step="2 / 9">
+          <i class="fa-solid fa-book-quran"></i>
+          <span>Doa & Ayat Suci</span>
+          <span class="tab-index-badge">2</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-acara" data-category="Pengaturan Konten" data-title="Rangkaian Acara" data-icon="fa-calendar-check" data-step="3 / 9">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Rangkaian Acara</span>
+          <span class="tab-index-badge">3</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-cerita" data-category="Pengaturan Konten" data-title="Kisah Cinta" data-icon="fa-feather-pointed" data-step="4 / 9">
+          <i class="fa-solid fa-feather-pointed"></i>
+          <span>Kisah Cinta</span>
+          <span class="tab-index-badge">4</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-galeri" data-category="Pengaturan Konten" data-title="Galeri Foto" data-icon="fa-images" data-step="5 / 9">
+          <i class="fa-solid fa-images"></i>
+          <span>Galeri Foto</span>
+          <span class="tab-index-badge">5</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-hadiah" data-category="Pengaturan Konten" data-title="Amplop & Kado" data-icon="fa-gift" data-step="6 / 9">
+          <i class="fa-solid fa-gift"></i>
+          <span>Amplop & Kado</span>
+          <span class="tab-index-badge">6</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-musik" data-category="Pengaturan Konten" data-title="Musik Latar" data-icon="fa-music" data-step="7 / 9">
+          <i class="fa-solid fa-music"></i>
+          <span>Musik Latar</span>
+          <span class="tab-index-badge">7</span>
+        </button>
+
+        <div class="sidebar-heading" style="margin-top: 16px;">Tamu & Undangan</div>
+        <button type="button" class="nav-tab-btn" data-tab="tab-tamu" data-category="Tamu & Undangan" data-title="Generator Tautan Tamu" data-icon="fa-share-nodes" data-step="8 / 9">
+          <i class="fa-solid fa-share-nodes"></i>
+          <span>Generator Tautan Tamu</span>
+          <span class="tab-index-badge">8</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="tab-rsvp" data-category="Tamu & Undangan" data-title="Buku Tamu & RSVP" data-icon="fa-clipboard-check" data-step="9 / 9">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span>Buku Tamu & RSVP</span>
+          <span class="tab-index-badge">9</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENT PANES -->
+    <main class="admin-content">
+
+      <!-- ==============================================================
+           TAB 1: DATA MEMPELAI
+           ============================================================== -->
+      <section id="tab-mempelai" class="tab-pane active">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-person"></i> Mempelai Pria (The Groom)</h2>
+              <p class="card-desc">Informasi lengkap calon mempelai pria</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Lengkap & Gelar</label>
+              <input type="text" id="groom-fullName" class="form-control" placeholder="Contoh: Raden Arya Pratama, S.T.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Panggilan</label>
+              <input type="text" id="groom-shortName" class="form-control" placeholder="Contoh: Arya">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Urutan Anak</label>
+              <input type="text" id="groom-childOrder" class="form-control" placeholder="Contoh: Putra pertama dari">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Ayah</label>
+              <input type="text" id="groom-fatherName" class="form-control" placeholder="Contoh: Ir. Bambang Hermanto">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Ibu</label>
+              <input type="text" id="groom-motherName" class="form-control" placeholder="Contoh: Siti Rahayu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username / Link Instagram</label>
+              <input type="text" id="groom-instagramHandle" class="form-control" placeholder="Contoh: @aryapratama">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Kutipan / Bio Singkat</label>
+              <textarea id="groom-bio" class="form-control" placeholder="Tuliskan deskripsi atau kutipan pribadi mempelai pria..."></textarea>
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Foto Mempelai Pria</label>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="groom-photo" class="form-control" placeholder="assets/images/groom.jpg">
+                <label class="btn btn-secondary" style="cursor: pointer; white-space: nowrap;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Foto
+                  <input type="file" accept="image/*" class="file-uploader-input" data-target-input="groom-photo" data-target-preview="preview-groom-photo" style="display: none;">
+                </label>
+              </div>
+              <div class="image-preview-wrapper">
+                <img id="preview-groom-photo" src="" alt="Pratinjau Groom" class="image-preview">
+                <span class="form-hint">Dapat upload langsung dari komputer atau masukkan link URL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-person-dress"></i> Mempelai Wanita (The Bride)</h2>
+              <p class="card-desc">Informasi lengkap calon mempelai wanita</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Lengkap & Gelar</label>
+              <input type="text" id="bride-fullName" class="form-control" placeholder="Contoh: Annisa Larasati Putri, S.E.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Panggilan</label>
+              <input type="text" id="bride-shortName" class="form-control" placeholder="Contoh: Annisa">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Urutan Anak</label>
+              <input type="text" id="bride-childOrder" class="form-control" placeholder="Contoh: Putri kedua dari">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Ayah</label>
+              <input type="text" id="bride-fatherName" class="form-control" placeholder="Contoh: Drs. H. Suryono">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Ibu</label>
+              <input type="text" id="bride-motherName" class="form-control" placeholder="Contoh: Hj. Nur Halimah">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username / Link Instagram</label>
+              <input type="text" id="bride-instagramHandle" class="form-control" placeholder="Contoh: @annisalrst">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Kutipan / Bio Singkat</label>
+              <textarea id="bride-bio" class="form-control" placeholder="Tuliskan deskripsi atau kutipan pribadi mempelai wanita..."></textarea>
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Foto Mempelai Wanita</label>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="bride-photo" class="form-control" placeholder="assets/images/bride.jpg">
+                <label class="btn btn-secondary" style="cursor: pointer; white-space: nowrap;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Foto
+                  <input type="file" accept="image/*" class="file-uploader-input" data-target-input="bride-photo" data-target-preview="preview-bride-photo" style="display: none;">
+                </label>
+              </div>
+              <div class="image-preview-wrapper">
+                <img id="preview-bride-photo" src="" alt="Pratinjau Bride" class="image-preview">
+                <span class="form-hint">Dapat upload langsung dari komputer atau masukkan link URL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-camera"></i> Foto Utama Bersama (Cover & Hero)</h2>
+              <p class="card-desc">Foto prewedding berdua untuk cover amplop dan latar atas undangan</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Foto Cover Utama</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+              <input type="text" id="heroPhoto" class="form-control" placeholder="assets/images/couple_hero.jpg">
+              <label class="btn btn-secondary" style="cursor: pointer; white-space: nowrap;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Foto
+                <input type="file" accept="image/*" class="file-uploader-input" data-target-input="heroPhoto" data-target-preview="preview-hero-photo" style="display: none;">
+              </label>
+            </div>
+            <div class="image-preview-wrapper">
+              <img id="preview-hero-photo" src="" alt="Pratinjau Cover" class="image-preview" style="width: 140px; height: 90px;">
+              <span class="form-hint">Rekomendasi rasio portrait atau 3:4 dengan pencahayaan hangat</span>
+            </div>
+          </div>
+          <div class="tab-wizard-footer">
+            <div></div>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-ayat')">
+              <span>Lanjut: Doa & Ayat Suci</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 2: DOA & AYAT SUCI
+           ============================================================== -->
+      <section id="tab-ayat" class="tab-pane">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-book-quran"></i> Kutipan / Ayat Suci</h2>
+              <p class="card-desc">Teks ayat suci Al-Qur'an atau kutipan doa pernikahan</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teks Kaligrafi / Arab</label>
+            <textarea id="quote-arabic" class="form-control" style="font-family: 'Amiri', serif; font-size: 1.15rem; direction: rtl; min-height: 110px;" placeholder="Tuliskan ayat dalam bahasa Arab..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Terjemahan Bahasa Indonesia</label>
+            <textarea id="quote-translation" class="form-control" style="min-height: 100px;" placeholder="Tuliskan terjemahan ayat..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sumber Kutipan / Nama Surat & Ayat</label>
+            <input type="text" id="quote-source" class="form-control" placeholder="Contoh: QS. Ar-Rum Ayat 21">
+          </div>
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-mempelai')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Data Mempelai</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-acara')">
+              <span>Lanjut: Rangkaian Acara</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 3: RANGKAIAN ACARA
+           ============================================================== -->
+      <section id="tab-acara" class="tab-pane">
+        <!-- Target Countdown -->
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-hourglass-half"></i> Waktu Target Hitung Mundur (Countdown)</h2>
+              <p class="card-desc">Pilih tanggal dan waktu mulainya akad nikah</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal & Jam Acara Utama (YYYY-MM-DDTHH:mm:ss)</label>
+            <input type="datetime-local" id="targetDate" class="form-control">
+            <span class="form-hint">Jam hitung mundur di halaman undangan akan otomatis menghitung mundur ke tanggal ini.</span>
+          </div>
+        </div>
+
+        <!-- Daftar Acara (Akad & Resepsi) -->
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-calendar-days"></i> Rangkaian Acara Pernikahan</h2>
+              <p class="card-desc">Atur jadwal Akad Nikah, Resepsi, atau sesi lainnya</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-event">
+              <i class="fa-solid fa-plus"></i> Tambah Acara
+            </button>
+          </div>
+
+          <div id="events-edit-list">
+            <!-- Rendered by js/admin.js -->
+          </div>
+
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-ayat')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Doa & Ayat Suci</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-cerita')">
+              <span>Lanjut: Kisah Cinta</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 4: KISAH CINTA (LOVE STORY)
+           ============================================================== -->
+      <section id="tab-cerita" class="tab-pane">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-feather-pointed"></i> Perjalanan Cinta (Love Story)</h2>
+              <p class="card-desc">Momen-momen berharga kedua mempelai dari awal bertemu hingga pelaminan</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-story">
+              <i class="fa-solid fa-plus"></i> Tambah Momen
+            </button>
+          </div>
+
+          <div id="story-edit-list">
+            <!-- Rendered by js/admin.js -->
+          </div>
+
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-acara')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Rangkaian Acara</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-galeri')">
+              <span>Lanjut: Galeri Foto</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 5: GALERI FOTO
+           ============================================================== -->
+      <section id="tab-galeri" class="tab-pane">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-images"></i> Galeri Momen Bahagia</h2>
+              <p class="card-desc">Koleksi foto prewedding dan momen istimewa</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-gallery">
+              <i class="fa-solid fa-plus"></i> Tambah Foto
+            </button>
+          </div>
+
+          <div id="gallery-edit-list">
+            <!-- Rendered by js/admin.js -->
+          </div>
+
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-cerita')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Kisah Cinta</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-hadiah')">
+              <span>Lanjut: Amplop & Kado</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 6: AMPLOP & KADO DIGITAL
+           ============================================================== -->
+      <section id="tab-hadiah" class="tab-pane">
+
+        <!-- PENGATURAN QRIS -->
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-qrcode"></i> Pengaturan Amplop Digital QRIS</h2>
+              <p class="card-desc">Tampilkan kartu scan QRIS untuk transfer antar-bank & e-wallet</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="qris-enable" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="qris-enable" style="font-size: 0.9rem; font-weight: 600; cursor: pointer;">Aktifkan QRIS</label>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Akun / Merchant QRIS</label>
+              <input type="text" id="qris-accountName" class="form-control" placeholder="Contoh: Raden Arya & Annisa">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor NMID / Merchant ID (Opsional)</label>
+              <input type="text" id="qris-nmid" class="form-control" placeholder="Contoh: ID1020261220999">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Gambar Barcode QRIS</label>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="qris-image" class="form-control" placeholder="assets/images/qris.svg">
+                <label class="btn btn-secondary" style="cursor: pointer; white-space: nowrap;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Gambar QRIS
+                  <input type="file" accept="image/*" class="file-uploader-input" data-target-input="qris-image" data-target-preview="preview-qris-image" style="display: none;">
+                </label>
+              </div>
+              <div class="image-preview-wrapper">
+                <img id="preview-qris-image" src="" alt="Pratinjau QRIS" class="image-preview" style="width: 100px; height: 140px; object-fit: contain; background: #FFF; padding: 4px;">
+                <span class="form-hint">Dapat upload file gambar barcode QRIS Anda (PNG, JPG, SVG)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-money-bill-transfer"></i> Rekening Bank & Dompet Digital</h2>
+              <p class="card-desc">Daftar rekening untuk amplop digital tanda kasih</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-bank">
+              <i class="fa-solid fa-plus"></i> Tambah Rekening
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Teks Pengantar Tanda Kasih</label>
+            <textarea id="gift-introText" class="form-control" placeholder="Tuliskan kata pengantar amplop digital..."></textarea>
+          </div>
+
+          <div id="bank-edit-list">
+            <!-- Rendered by js/admin.js -->
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-box-open"></i> Pengiriman Hadiah Fisik</h2>
+              <p class="card-desc">Alamat rumah untuk tamu yang ingin mengirimkan kado fisik</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Penerima</label>
+              <input type="text" id="gift-recipientName" class="form-control" placeholder="Contoh: Arya & Annisa">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor WhatsApp / Telepon</label>
+              <input type="text" id="gift-phone" class="form-control" placeholder="Contoh: +62 812-3456-7890">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Alamat Lengkap Pengiriman</label>
+              <textarea id="gift-address" class="form-control" placeholder="Tuliskan alamat lengkap beserta kode pos..."></textarea>
+            </div>
+          </div>
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-galeri')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Galeri Foto</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-musik')">
+              <span>Lanjut: Musik Latar</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 7: MUSIK LATAR
+           ============================================================== -->
+      <section id="tab-musik" class="tab-pane">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-compact-disc"></i> Pengaturan Musik Latar</h2>
+              <p class="card-desc">Lagu yang otomatis berputar saat tamu membuka undangan</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Judul Lagu & Nama Musisi</label>
+            <input type="text" id="music-title" class="form-control" placeholder="Contoh: Satu Shaf Di Belakangku - Arvian Dwi">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lokasi Berkas Audio MP3 / URL</label>
+            <input type="text" id="music-audioFile" class="form-control" placeholder="assets/audio/satu_shaf_di_belakangku.mp3">
+            <span class="form-hint">Letakkan file .mp3 di folder assets/audio/ lalu masukkan jalurnya di sini.</span>
+          </div>
+          <div style="margin-top: 16px;">
+            <audio id="admin-audio-preview" controls style="width: 100%; max-width: 480px;">
+              <source id="admin-audio-source" src="" type="audio/mpeg">
+              Browser Anda tidak mendukung audio HTML5.
+            </audio>
+          </div>
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-hadiah')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Amplop & Kado</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-tamu')">
+              <span>Lanjut: Generator Tamu</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 8: GENERATOR TAUTAN TAMU & WHATSAPP BLAST
+           ============================================================== -->
+      <section id="tab-tamu" class="tab-pane">
+        <div class="guest-generator-card">
+          <h2 class="card-title" style="margin-bottom: 8px;">
+            <i class="fa-brands fa-whatsapp text-success"></i> Generator Undangan & Teks WhatsApp
+          </h2>
+          <p class="card-desc" style="margin-bottom: 20px;">
+            Ketikkan nama tamu, lalu salin tautan personal atau langsung kirim pesan undangan santun via WhatsApp!
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Tamu / Keluarga</label>
+              <input type="text" id="gen-guest-name" class="form-control" placeholder="Contoh: Bpk. Bambang & Keluarga" value="Bpk. Dimas Setiawan & Partner">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor WhatsApp Tamu (Opsional)</label>
+              <input type="text" id="gen-guest-phone" class="form-control" placeholder="Contoh: 08123456789 atau 628123456789">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label">Tautan Khusus Tamu (Otomatis)</label>
+              <div class="input-action-group">
+                <input type="text" id="gen-guest-link" class="form-control" readonly>
+                <button type="button" id="btn-copy-guest-link" class="btn btn-secondary">
+                  <i class="fa-regular fa-copy"></i> Salin Link
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <label class="form-label" style="margin-top: 14px;">Pratinjau Teks Pesan WhatsApp</label>
+          <div id="gen-message-preview" class="share-preview-box"></div>
+
+          <div class="action-buttons-group">
+            <button type="button" id="btn-copy-wa-text" class="btn btn-secondary">
+              <i class="fa-regular fa-copy"></i> Salin Teks Pesan
+            </button>
+            <a id="btn-send-whatsapp" href="#" target="_blank" class="btn btn-primary" style="background: #25D366; border-color: #25D366;">
+              <i class="fa-brands fa-whatsapp"></i> Buka & Kirim di WhatsApp
+            </a>
+          </div>
+
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-musik')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Musik Latar</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="goToAdminTab('tab-rsvp')">
+              <span>Lanjut: Buku Tamu & RSVP</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           TAB 9: BUKU TAMU & RSVP
+           ============================================================== -->
+      <section id="tab-rsvp" class="tab-pane">
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-clipboard-check"></i> Daftar Doa Restu & Kehadiran Tamu</h2>
+              <p class="card-desc">Konfirmasi kehadiran yang dikirimkan oleh para tamu melalui website</p>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button type="button" id="btn-sync-sheets" class="btn btn-secondary btn-sm" title="Tarik ucapan terbaru langsung dari Google Spreadsheet">
+                <i class="fa-solid fa-arrows-rotate"></i> Sinkron Spreadsheet
+              </button>
+              <a href="https://docs.google.com/spreadsheets/d/1aij0iuzvTOaQBd1M-dYVz_AG0CEqG5K28dv1AZc1LtM/edit?gid=0#gid=0" target="_blank" class="btn btn-secondary btn-sm" title="Buka Google Sheets di tab baru">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Sheets
+              </a>
+              <button type="button" id="btn-export-wishes" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-file-export"></i> Ekspor Data
+              </button>
+              <button type="button" id="btn-clear-wishes" class="btn btn-danger btn-sm">
+                <i class="fa-solid fa-trash-can"></i> Hapus Semua
+              </button>
+            </div>
+          </div>
+
+          <!-- Counter Kehadiran -->
+          <div class="rsvp-counter-grid">
+            <div class="rsvp-counter-card hadir">
+              <div id="count-hadir" class="rsvp-count-num">0</div>
+              <div class="rsvp-count-label">HADIR</div>
+            </div>
+            <div class="rsvp-counter-card ragu">
+              <div id="count-ragu" class="rsvp-count-num">0</div>
+              <div class="rsvp-count-label">MASIH RAGU</div>
+            </div>
+            <div class="rsvp-counter-card tidak">
+              <div id="count-tidak" class="rsvp-count-num">0</div>
+              <div class="rsvp-count-label">TIDAK HADIR</div>
+            </div>
+          </div>
+
+          <!-- Tabel Ucapan -->
+          <div class="table-responsive">
+            <table class="rsvp-table">
+              <thead>
+                <tr>
+                  <th>Nama Tamu</th>
+                  <th>Kehadiran</th>
+                  <th>Pesan & Doa</th>
+                  <th>Waktu</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="rsvp-table-body">
+                <!-- Rendered by js/admin.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tab-wizard-footer">
+            <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-tamu')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Generator Tamu</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-wizard-next" onclick="document.getElementById('btn-save-all').click()">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Simpan Semua Perubahan</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="admin-toast" class="admin-toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="admin-toast-text">Perubahan berhasil disimpan!</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 550" width="400" height="550">
+  <!-- Card Background -->
+  <rect width="400" height="550" rx="20" fill="#FFFFFF" stroke="#E0D7C6" stroke-width="2"/>
+  
+  <!-- Top Banner Red Accent -->
+  <path d="M 0 20 Q 0 0 20 0 L 380 0 Q 400 0 400 20 L 400 90 L 0 90 Z" fill="#EE2737"/>
+  
+  <!-- QRIS White Logo Text -->
+  <text x="200" y="52" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="34" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">QRIS</text>
+  <text x="200" y="74" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">STANDAR PEMBAYARAN NASIONAL</text>
+
+  <!-- Merchant Info -->
+  <rect x="25" y="105" width="350" height="58" rx="10" fill="#FAF7F2" stroke="#EADCC7" stroke-width="1"/>
+  <text x="200" y="128" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="14" font-weight="800" fill="#22201D" text-anchor="middle">RADEN ARYA &amp; ANNISA</text>
+  <text x="200" y="148" font-family="monospace" font-size="11" font-weight="600" fill="#8C857B" text-anchor="middle">NMID : ID1020261220999</text>
+
+  <!-- QR Code Frame -->
+  <rect x="40" y="180" width="320" height="320" rx="12" fill="#FFFFFF" stroke="#D4AF37" stroke-width="2"/>
+  
+  <!-- QR Code Matrix Simulation -->
+  <!-- Top-Left Finder Pattern -->
+  <rect x="65" y="205" width="70" height="70" rx="8" fill="#1E1B18"/>
+  <rect x="77" y="217" width="46" height="46" rx="4" fill="#FFFFFF"/>
+  <rect x="87" y="227" width="26" height="26" rx="2" fill="#1E1B18"/>
+
+  <!-- Top-Right Finder Pattern -->
+  <rect x="265" y="205" width="70" height="70" rx="8" fill="#1E1B18"/>
+  <rect x="277" y="217" width="46" height="46" rx="4" fill="#FFFFFF"/>
+  <rect x="287" y="227" width="26" height="26" rx="2" fill="#1E1B18"/>
+
+  <!-- Bottom-Left Finder Pattern -->
+  <rect x="65" y="405" width="70" height="70" rx="8" fill="#1E1B18"/>
+  <rect x="77" y="417" width="46" height="46" rx="4" fill="#FFFFFF"/>
+  <rect x="87" y="427" width="26" height="26" rx="2" fill="#1E1B18"/>
+
+  <!-- QR Matrix Grid Cells (Simulated Authentic High-Density Data) -->
+  <g fill="#1E1B18">
+    <!-- Center Logo Badge -->
+    <rect x="155" y="210" width="16" height="16" rx="2"/>
+    <rect x="185" y="210" width="16" height="30" rx="2"/>
+    <rect x="215" y="210" width="30" height="16" rx="2"/>
+
+    <rect x="150" y="245" width="24" height="20" rx="2"/>
+    <rect x="190" y="250" width="20" height="20" rx="2"/>
+    <rect x="225" y="240" width="18" height="24" rx="2"/>
+
+    <!-- Middle cluster -->
+    <rect x="75" y="295" width="20" height="20" rx="2"/>
+    <rect x="110" y="290" width="35" height="15" rx="2"/>
+    <rect x="160" y="285" width="80" height="80" rx="10" fill="#FAF7F2" stroke="#EE2737" stroke-width="2"/>
+    <!-- Small GPN badge inside center -->
+    <text x="200" y="328" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="14" font-weight="900" fill="#EE2737" text-anchor="middle">GPN</text>
+    <text x="200" y="344" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="8" font-weight="700" fill="#22201D" text-anchor="middle">INDONESIA</text>
+
+    <rect x="255" y="290" width="35" height="18" rx="2"/>
+    <rect x="305" y="295" width="25" height="20" rx="2"/>
+
+    <rect x="70" y="335" width="28" height="18" rx="2"/>
+    <rect x="115" y="330" width="18" height="30" rx="2"/>
+    <rect x="260" y="330" width="22" height="28" rx="2"/>
+    <rect x="300" y="335" width="30" height="16" rx="2"/>
+
+    <!-- Bottom cluster -->
+    <rect x="155" y="385" width="25" height="20" rx="2"/>
+    <rect x="195" y="380" width="20" height="30" rx="2"/>
+    <rect x="230" y="390" width="20" height="20" rx="2"/>
+    <rect x="265" y="405" width="30" height="20" rx="2"/>
+    <rect x="310" y="415" width="20" height="30" rx="2"/>
+
+    <rect x="150" y="430" width="35" height="18" rx="2"/>
+    <rect x="200" y="425" width="40" height="18" rx="2"/>
+    <rect x="255" y="440" width="30" height="25" rx="2"/>
+    <rect x="300" y="455" width="35" height="20" rx="2"/>
+
+    <rect x="160" y="465" width="28" height="20" rx="2"/>
+    <rect x="210" y="460" width="20" height="25" rx="2"/>
+    <rect x="245" y="475" width="35" height="15" rx="2"/>
+  </g>
+
+  <!-- Bottom Helper Note -->
+  <text x="200" y="525" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="11" font-weight="600" fill="#736C64" text-anchor="middle">Dapat di-scan dengan seluruh aplikasi M-Banking &amp; E-Wallet</text>
+</svg>
