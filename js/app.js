@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tasks = [
     { name: 'GuestName', fn: initGuestName },
     { name: 'Cover', fn: initCover },
+    { name: 'AutoScroll', fn: initAutoScroll },
     { name: 'Countdown', fn: initCountdown },
     { name: 'CoupleData', fn: initCoupleData },
     { name: 'Events', fn: initEvents },
@@ -75,6 +76,7 @@ function initCover() {
   const btnOpen = document.getElementById('btn-open-invitation');
   const bottomDock = document.getElementById('bottom-dock');
   const musicToggle = document.getElementById('music-toggle');
+  const autoscrollToggle = document.getElementById('autoscroll-toggle');
 
   if (!btnOpen || !coverOverlay) return;
 
@@ -84,6 +86,7 @@ function initCover() {
 
     if (bottomDock) bottomDock.classList.add('active');
     if (musicToggle) musicToggle.style.display = 'flex';
+    if (autoscrollToggle) autoscrollToggle.style.display = 'flex';
 
     // Play Music
     playBackgroundMusic();
@@ -94,7 +97,128 @@ function initCover() {
       checkReveals();
       window.dispatchEvent(new Event('scroll'));
     }, 300);
+
+    // Aktifkan Auto Scroll secara otomatis setelah cover selesai membuka
+    setTimeout(() => {
+      startAutoScroll();
+    }, 800);
   });
+}
+
+/* ====================================================================
+   AUTO SCROLL ENGINE & KONTROL INTERAKTIF
+   ==================================================================== */
+let isAutoScrolling = false;
+let autoScrollAnimId = null;
+const AUTO_SCROLL_SPEED = 0.95; // Pixels per frame pada 60fps (~57px per detik)
+let lastAutoScrollTimestamp = null;
+
+function initAutoScroll() {
+  const autoscrollBtn = document.getElementById('autoscroll-toggle');
+  if (autoscrollBtn) {
+    autoscrollBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAutoScroll();
+    });
+  }
+
+  // Jeda auto-scroll saat pengguna berinteraksi manual (scroll / sentuh layar)
+  const handleUserInterrupt = (e) => {
+    if (isAutoScrolling) {
+      if (e && e.target && (e.target.closest('#autoscroll-toggle') || e.target.closest('#music-toggle'))) {
+        return;
+      }
+      stopAutoScroll();
+    }
+  };
+
+  window.addEventListener('wheel', handleUserInterrupt, { passive: true });
+  window.addEventListener('touchstart', handleUserInterrupt, { passive: true });
+  window.addEventListener('pointerdown', handleUserInterrupt, { passive: true });
+
+  // Jeda saat klik salah satu link di bottom dock agar navigasi anchor tidak terganggu
+  const dockLinks = document.querySelectorAll('#bottom-dock a');
+  dockLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      stopAutoScroll();
+    });
+  });
+}
+
+function startAutoScroll() {
+  if (isAutoScrolling) return;
+  isAutoScrolling = true;
+  lastAutoScrollTimestamp = null;
+  updateAutoScrollBtn(true);
+
+  function autoScrollStep(timestamp) {
+    if (!isAutoScrolling) return;
+
+    if (!lastAutoScrollTimestamp) lastAutoScrollTimestamp = timestamp;
+    const elapsed = timestamp - lastAutoScrollTimestamp;
+    lastAutoScrollTimestamp = timestamp;
+
+    // Normalisasi delta waktu agar kecepatan stabil di layar 60Hz, 90Hz, 120Hz
+    const deltaMultiplier = Math.min(Math.max(elapsed / 16.67, 0.5), 2.5);
+    const scrollStep = AUTO_SCROLL_SPEED * deltaMultiplier;
+
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= maxScroll - 6) {
+      // Sampai di bagian bawah halaman
+      stopAutoScroll();
+      return;
+    }
+
+    window.scrollBy(0, scrollStep);
+    autoScrollAnimId = requestAnimationFrame(autoScrollStep);
+  }
+
+  autoScrollAnimId = requestAnimationFrame(autoScrollStep);
+}
+
+function stopAutoScroll() {
+  isAutoScrolling = false;
+  if (autoScrollAnimId) {
+    cancelAnimationFrame(autoScrollAnimId);
+    autoScrollAnimId = null;
+  }
+  updateAutoScrollBtn(false);
+}
+
+function toggleAutoScroll() {
+  if (isAutoScrolling) {
+    stopAutoScroll();
+    if (typeof showToast === 'function') {
+      showToast('Auto scroll dijeda');
+    }
+  } else {
+    // Jika sudah di paling bawah, gulir sedikit ke atas
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= maxScroll - 10) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => startAutoScroll(), 600);
+    } else {
+      startAutoScroll();
+    }
+    if (typeof showToast === 'function') {
+      showToast('Auto scroll diaktifkan');
+    }
+  }
+}
+
+function updateAutoScrollBtn(scrolling) {
+  const btn = document.getElementById('autoscroll-toggle');
+  if (!btn) return;
+
+  if (scrolling) {
+    btn.classList.add('scrolling');
+    btn.innerHTML = '<i class="fa-solid fa-angles-down"></i>';
+    btn.setAttribute('title', 'Auto Scroll Aktif (Klik untuk Jeda)');
+  } else {
+    btn.classList.remove('scrolling');
+    btn.innerHTML = '<i class="fa-solid fa-play" style="margin-left: 2px;"></i>';
+    btn.setAttribute('title', 'Lanjutkan Auto Scroll');
+  }
 }
 
 /* ====================================================================
