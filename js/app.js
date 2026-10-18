@@ -110,7 +110,7 @@ function initCover() {
    ==================================================================== */
 let isAutoScrolling = false;
 let autoScrollAnimId = null;
-const AUTO_SCROLL_SPEED = 0.95; // Pixels per frame pada 60fps (~57px per detik)
+const AUTO_SCROLL_SPEED = (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.autoScrollSpeed) ? WEDDING_CONFIG.autoScrollSpeed : 1.9; // Kecepatan dinaikkan 2x lipat (~115px per detik pada 60fps)
 let lastAutoScrollTimestamp = null;
 
 function initAutoScroll() {

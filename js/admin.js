@@ -734,7 +734,8 @@ function collectAllDataFromDOM() {
     music,
     initialWishes: WEDDING_CONFIG.initialWishes || [],
     appsScriptUrl: WEDDING_CONFIG.appsScriptUrl || '',
-    spreadsheetUrl: WEDDING_CONFIG.spreadsheetUrl || ''
+    spreadsheetUrl: WEDDING_CONFIG.spreadsheetUrl || '',
+    autoScrollSpeed: WEDDING_CONFIG.autoScrollSpeed || 1.9
   };
 }
 
