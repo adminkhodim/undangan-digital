@@ -53,6 +53,11 @@ html {
   background-color: #171513;
 }
 
+/* Menonaktifkan smooth scrolling bawaan saat auto-scroll aktif agar tidak berat / lag saat melewati teks */
+html.is-autoscrolling {
+  scroll-behavior: auto !important;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--text-dark);

@@ -110,7 +110,7 @@ function initCover() {
    ==================================================================== */
 let isAutoScrolling = false;
 let autoScrollAnimId = null;
-const AUTO_SCROLL_SPEED = (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.autoScrollSpeed) ? WEDDING_CONFIG.autoScrollSpeed : 1.9; // Kecepatan dinaikkan 2x lipat (~115px per detik pada 60fps)
+const AUTO_SCROLL_SPEED = (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.autoScrollSpeed) ? WEDDING_CONFIG.autoScrollSpeed : 2.8; // Kecepatan optimal (~170px per detik pada 60fps)
 let lastAutoScrollTimestamp = null;
 
 function initAutoScroll() {
@@ -149,6 +149,7 @@ function startAutoScroll() {
   if (isAutoScrolling) return;
   isAutoScrolling = true;
   lastAutoScrollTimestamp = null;
+  document.documentElement.classList.add('is-autoscrolling');
   updateAutoScrollBtn(true);
 
   function autoScrollStep(timestamp) {
@@ -182,6 +183,7 @@ function stopAutoScroll() {
     cancelAnimationFrame(autoScrollAnimId);
     autoScrollAnimId = null;
   }
+  document.documentElement.classList.remove('is-autoscrolling');
   updateAutoScrollBtn(false);
 }
 
@@ -891,42 +893,62 @@ function initScrollAnimations() {
       });
     }, {
       threshold: 0.05,
-      rootMargin: '100px 0px 100px 0px'
+      rootMargin: '120px 0px 120px 0px'
     });
 
     reveals.forEach(el => revealObserver.observe(el));
+  } else {
+    // Fallback debounced scroll listener hanya jika IntersectionObserver tidak didukung browser jadul
+    let scrollTimeout = null;
+    window.addEventListener('scroll', () => {
+      if (!scrollTimeout) {
+        scrollTimeout = setTimeout(() => {
+          checkReveals();
+          scrollTimeout = null;
+        }, 120);
+      }
+    }, { passive: true });
   }
 
-  // Backup scroll & resize listener
-  window.addEventListener('scroll', checkReveals, { passive: true });
-  window.addEventListener('resize', checkReveals, { passive: true });
+  // Initial check saat halaman pertama kali dibuka
   checkReveals();
 }
 
 /* ====================================================================
-   12. SCROLL SPY FOR BOTTOM DOCK
+   12. SCROLL SPY FOR BOTTOM DOCK (OPTIMIZED WITH RAF)
    ==================================================================== */
 function initScrollSpy() {
   const sections = document.querySelectorAll('section[id]');
   const dockItems = document.querySelectorAll('.dock-item');
+  if (sections.length === 0 || dockItems.length === 0) return;
+
+  let isTicking = false;
+  let activeSectionId = '';
 
   window.addEventListener('scroll', () => {
-    let current = '';
-    const scrollY = window.pageYOffset;
+    if (!isTicking) {
+      window.requestAnimationFrame(() => {
+        let current = '';
+        const scrollY = window.pageYOffset;
 
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 120;
-      const sectionHeight = section.offsetHeight;
-      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
-      }
-    });
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 140;
+          const sectionHeight = section.offsetHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = section.getAttribute('id');
+          }
+        });
 
-    dockItems.forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('href') === `#${current}`) {
-        item.classList.add('active');
-      }
-    });
-  });
+        if (current && current !== activeSectionId) {
+          activeSectionId = current;
+          dockItems.forEach(item => {
+            const matches = item.getAttribute('href') === `#${current}`;
+            item.classList.toggle('active', matches);
+          });
+        }
+        isTicking = false;
+      });
+      isTicking = true;
+    }
+  }, { passive: true });
 }
