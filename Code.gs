@@ -436,7 +436,7 @@ function initAllTabs(ss) {
   // Tab 1: Mempelai
   getOrCreateSheet(ss, 'Mempelai', [
     'Peran', 'Nama Lengkap & Gelar', 'Nama Panggilan', 'Urutan Anak', 
-    'Nama Ayah', 'Nama Ibu', 'Instagram Handle', 'URL Foto', 'Kutipan / Bio Singkat'
+    'Nama Ayah', 'Nama Ibu', 'Instagram Handle', 'URL Foto', 'Kutipan / Bio Singkat', 'Alamat Asal Mempelai'
   ]);
 
   // Tab 2: Doa_Ayat
@@ -490,6 +490,13 @@ function getOrCreateSheet(ss, sheetName, headers) {
   if (sheet.getLastRow() === 0 && headers && headers.length > 0) {
     sheet.appendRow(headers);
     formatHeaderRow(sheet, headers.length);
+  } else if (headers && headers.length > 0) {
+    // Sinkronkan dan perbarui baris header jika ada penambahan kolom baru
+    var curCols = sheet.getLastColumn();
+    if (curCols < headers.length) {
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      formatHeaderRow(sheet, headers.length);
+    }
   }
 
   return sheet;
@@ -521,7 +528,7 @@ function saveAllConfigToSheets(ss, cfg) {
   // 1. TAB MEMPELAI
   var sMempelai = getOrCreateSheet(ss, 'Mempelai', [
     'Peran', 'Nama Lengkap & Gelar', 'Nama Panggilan', 'Urutan Anak', 
-    'Nama Ayah', 'Nama Ibu', 'Instagram Handle', 'URL Foto', 'Kutipan / Bio Singkat'
+    'Nama Ayah', 'Nama Ibu', 'Instagram Handle', 'URL Foto', 'Kutipan / Bio Singkat', 'Alamat Asal Mempelai'
   ]);
   clearDataRows(sMempelai);
 
