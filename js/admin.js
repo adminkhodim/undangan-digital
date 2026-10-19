@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRSVPManagement();
   initPreviewListeners();
   initImageUploaders();
+  initAutoScrollAdminControls();
 });
 
 /* ====================================================================
@@ -236,6 +237,23 @@ function populateForm(cfg) {
   const audioPreview = document.getElementById('admin-audio-preview');
   if (audioPreview && music.audioFile) {
     audioPreview.src = music.audioFile;
+  }
+
+  // 10. Auto Scroll
+  const scrollSpeed = cfg.autoScrollSpeed || 2.8;
+  const speedSlider = document.getElementById('autoscroll-speed-slider');
+  const speedInput = document.getElementById('autoscroll-speed-input');
+  if (speedSlider) speedSlider.value = scrollSpeed;
+  if (speedInput) speedInput.value = scrollSpeed;
+
+  const autoStartCheck = document.getElementById('autoscroll-autostart');
+  if (autoStartCheck) {
+    autoStartCheck.checked = cfg.autoScrollAutoStart !== false;
+  }
+
+  // Trigger event agar badge & deskripsi terupdate visualnya
+  if (speedSlider) {
+    speedSlider.dispatchEvent(new Event('input'));
   }
 
   // Update generator tamu dengan nama mempelai
@@ -709,6 +727,9 @@ function collectAllDataFromDOM() {
     fallbackSynthesizer: true
   };
 
+  const autoScrollSpeed = parseFloat(getVal('autoscroll-speed-input') || getVal('autoscroll-speed-slider')) || 2.8;
+  const autoScrollAutoStart = document.getElementById('autoscroll-autostart')?.checked ?? true;
+
   return {
     couple: {
       groom,
@@ -735,7 +756,8 @@ function collectAllDataFromDOM() {
     initialWishes: WEDDING_CONFIG.initialWishes || [],
     appsScriptUrl: WEDDING_CONFIG.appsScriptUrl || '',
     spreadsheetUrl: WEDDING_CONFIG.spreadsheetUrl || '',
-    autoScrollSpeed: WEDDING_CONFIG.autoScrollSpeed || 2.8
+    autoScrollSpeed,
+    autoScrollAutoStart
   };
 }
 
@@ -1080,5 +1102,75 @@ function initImageUploaders() {
       };
       reader.readAsDataURL(file);
     }
+  });
+}
+
+/* ====================================================================
+   10. PENGATURAN KECEPATAN AUTO SCROLL DI PORTAL ADMIN
+   ==================================================================== */
+function initAutoScrollAdminControls() {
+  const slider = document.getElementById('autoscroll-speed-slider');
+  const input = document.getElementById('autoscroll-speed-input');
+  const badge = document.getElementById('autoscroll-speed-badge');
+  const desc = document.getElementById('autoscroll-speed-desc');
+  const presets = document.querySelectorAll('.btn-speed-preset');
+
+  function updateSpeedDisplay(val) {
+    const num = parseFloat(val) || 2.8;
+    if (slider) slider.value = num;
+    if (input) input.value = num;
+    if (badge) badge.textContent = `${num.toFixed(1)}x`;
+
+    let descText = '(Sedang)';
+    let badgeClass = 'badge-success';
+
+    if (num < 1.6) {
+      descText = '(Santai & Perlahan)';
+      badgeClass = 'badge-secondary';
+    } else if (num < 2.4) {
+      descText = '(Sedang & Halus)';
+      badgeClass = 'badge-secondary';
+    } else if (num <= 3.2) {
+      descText = '(Lincah & Rekomendasi)';
+      badgeClass = 'badge-success';
+    } else if (num <= 4.2) {
+      descText = '(Cepat & Gesit)';
+      badgeClass = 'badge-warning';
+    } else {
+      descText = '(Sangat Cepat / Kilat)';
+      badgeClass = 'badge-danger';
+    }
+
+    if (desc) desc.textContent = descText;
+    if (badge) {
+      badge.className = `badge ${badgeClass}`;
+    }
+
+    // Highlight preset button if match
+    presets.forEach(btn => {
+      const pSpeed = parseFloat(btn.getAttribute('data-speed'));
+      if (Math.abs(pSpeed - num) < 0.15) {
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+      } else {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+      }
+    });
+  }
+
+  slider?.addEventListener('input', (e) => {
+    updateSpeedDisplay(e.target.value);
+  });
+
+  input?.addEventListener('input', (e) => {
+    updateSpeedDisplay(e.target.value);
+  });
+
+  presets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const speed = btn.getAttribute('data-speed');
+      updateSpeedDisplay(speed);
+    });
   });
 }

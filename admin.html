@@ -139,9 +139,9 @@
           <span>Amplop & Kado</span>
           <span class="tab-index-badge">6</span>
         </button>
-        <button type="button" class="nav-tab-btn" data-tab="tab-musik" data-category="Pengaturan Konten" data-title="Musik Latar" data-icon="fa-music" data-step="7 / 9">
+        <button type="button" class="nav-tab-btn" data-tab="tab-musik" data-category="Pengaturan Konten" data-title="Musik & Auto Scroll" data-icon="fa-music" data-step="7 / 9">
           <i class="fa-solid fa-music"></i>
-          <span>Musik Latar</span>
+          <span>Musik & Auto Scroll</span>
           <span class="tab-index-badge">7</span>
         </button>
 
@@ -575,6 +575,73 @@
               Browser Anda tidak mendukung audio HTML5.
             </audio>
           </div>
+        </div>
+
+        <!-- PENGATURAN KECEPATAN AUTO SCROLL -->
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-angles-down"></i> Pengaturan Auto Scroll Undangan</h2>
+              <p class="card-desc">Atur laju gulir otomatis saat tamu membaca undangan di smartphone atau desktop</p>
+            </div>
+          </div>
+
+          <!-- Toggle Mulai Otomatis -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #FAF7F2; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 22px;">
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--dark);">Mulai Otomatis saat Buka Undangan</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Auto-scroll langsung berjalan begitu tamu menekan tombol "Buka Undangan"</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="autoscroll-autostart" checked>
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <!-- Slider Kecepatan -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+              <label class="form-label" style="margin-bottom: 0;">Kecepatan Gulir Halaman</label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="autoscroll-speed-badge" class="badge badge-success" style="font-size: 0.92rem; padding: 4px 10px; font-weight: 700;">2.8x</span>
+                <span id="autoscroll-speed-desc" style="font-size: 0.82rem; color: var(--text-muted);">(Lincah & Nyaman)</span>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; margin-top: 10px;">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">1.0x (Santai)</span>
+              <input type="range" id="autoscroll-speed-slider" min="1.0" max="5.0" step="0.2" value="2.8" style="flex: 1; height: 8px; cursor: pointer; accent-color: var(--primary);">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">5.0x (Kilat)</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px;">
+              <input type="number" id="autoscroll-speed-input" class="form-control" min="1.0" max="6.0" step="0.1" value="2.8" style="max-width: 120px;">
+              <span class="form-hint" style="margin-top: 0;">Nilai kecepatan gulir (standar rekomendasi: 2.5x - 3.2x).</span>
+            </div>
+          </div>
+
+          <!-- Preset Pilihan Cepat -->
+          <div style="margin-top: 20px;">
+            <label class="form-label" style="font-size: 0.82rem; margin-bottom: 8px;">Pilihan Cepat (Preset):</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm btn-speed-preset" data-speed="1.4">
+                🐢 Santai (1.4x)
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-speed-preset" data-speed="2.0">
+                🚶 Sedang (2.0x)
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-speed-preset" data-speed="2.8">
+                ⭐ Lincah / Rekomendasi (2.8x)
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-speed-preset" data-speed="3.6">
+                ⚡ Cepat (3.6x)
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-speed-preset" data-speed="4.8">
+                🚀 Kilat (4.8x)
+              </button>
+            </div>
+          </div>
+
           <div class="tab-wizard-footer">
             <button type="button" class="btn btn-secondary" onclick="goToAdminTab('tab-hadiah')">
               <i class="fa-solid fa-arrow-left"></i>

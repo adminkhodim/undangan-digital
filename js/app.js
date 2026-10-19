@@ -98,10 +98,12 @@ function initCover() {
       window.dispatchEvent(new Event('scroll'));
     }, 300);
 
-    // Aktifkan Auto Scroll secara otomatis setelah cover selesai membuka
-    setTimeout(() => {
-      startAutoScroll();
-    }, 800);
+    // Aktifkan Auto Scroll secara otomatis setelah cover selesai membuka (jika diaktifkan di admin)
+    if (typeof WEDDING_CONFIG === 'undefined' || WEDDING_CONFIG.autoScrollAutoStart !== false) {
+      setTimeout(() => {
+        startAutoScroll();
+      }, 800);
+    }
   });
 }
 

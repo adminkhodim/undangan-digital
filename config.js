@@ -206,7 +206,8 @@ const WEDDING_CONFIG = {
   ],
   "appsScriptUrl": "https://script.google.com/macros/s/AKfycbylw1T_Lv0lxniv9-KowxxcGcYGQyb3WLTj30UQQMTsf7dvb460vFn50NY0TdFo2Tes/exec",
   "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1aij0iuzvTOaQBd1M-dYVz_AG0CEqG5K28dv1AZc1LtM/edit?gid=0#gid=0",
-  "autoScrollSpeed": 2.8
+  "autoScrollSpeed": 2.8,
+  "autoScrollAutoStart": true
 };
 
 // Shortcut aliases untuk kemudahan akses
