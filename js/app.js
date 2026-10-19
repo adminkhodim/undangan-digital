@@ -530,11 +530,14 @@ function formatInvitationDate() {
   let fullDateText = '';
   let dayName = '';
 
-  const idDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const idDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
   const idMonths = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isMultiTenant = !!(urlParams.get('u') || urlParams.get('slug'));
 
   // 1. Ambil dari event pertama jika tersedia
   if (WEDDING_CONFIG.events && WEDDING_CONFIG.events.length > 0) {
@@ -543,27 +546,35 @@ function formatInvitationDate() {
     fullDateText = ev.dateFormatted || '';
 
     if (fullDateText) {
-      // Contoh format: "23 Oktober 2026" atau "23-10-2026"
+      // Contoh format: "23 Oktober 2026" atau "23-10-2026" atau "2026-10-23"
       const parts = fullDateText.trim().split(/[\s,.-]+/);
       if (parts.length >= 3) {
-        day = parts[0].padStart(2, '0');
-        const monthsMap = {
-          'januari': '01', 'jan': '01', '01': '01', '1': '01',
-          'februari': '02', 'feb': '02', '02': '02', '2': '02',
-          'maret': '03', 'mar': '03', '03': '03', '3': '03',
-          'april': '04', 'apr': '04', '04': '04', '4': '04',
-          'mei': '05', '05': '05', '5': '05',
-          'juni': '06', 'jun': '06', '06': '06', '6': '06',
-          'juli': '07', 'jul': '07', '07': '07', '7': '07',
-          'agustus': '08', 'ags': '08', 'agu': '08', '08': '08', '8': '08',
-          'september': '09', 'sep': '09', '09': '09', '9': '09',
-          'oktober': '10', 'okt': '10', '10': '10',
-          'november': '11', 'nov': '11', '11': '11',
-          'desember': '12', 'des': '12', '12': '12'
-        };
-        const mKey = parts[1].toLowerCase();
-        if (monthsMap[mKey]) month = monthsMap[mKey];
-        year = parts[2];
+        if (parts[0].length === 4) {
+          // Format ISO: YYYY-MM-DD
+          year = parts[0];
+          month = parts[1].padStart(2, '0');
+          day = parts[2].padStart(2, '0');
+        } else {
+          // Format DD Bulan YYYY atau DD-MM-YYYY
+          day = parts[0].padStart(2, '0');
+          const monthsMap = {
+            'januari': '01', 'jan': '01', '01': '01', '1': '01',
+            'februari': '02', 'feb': '02', '02': '02', '2': '02',
+            'maret': '03', 'mar': '03', '03': '03', '3': '03',
+            'april': '04', 'apr': '04', '04': '04', '4': '04',
+            'mei': '05', '05': '05', '5': '05',
+            'juni': '06', 'jun': '06', '06': '06', '6': '06',
+            'juli': '07', 'jul': '07', '07': '07', '7': '07',
+            'agustus': '08', 'ags': '08', 'agu': '08', '08': '08', '8': '08',
+            'september': '09', 'sep': '09', '09': '09', '9': '09',
+            'oktober': '10', 'okt': '10', '10': '10',
+            'november': '11', 'nov': '11', '11': '11',
+            'desember': '12', 'des': '12', '12': '12'
+          };
+          const mKey = parts[1].toLowerCase();
+          if (monthsMap[mKey]) month = monthsMap[mKey];
+          year = parts[2];
+        }
       }
     }
   }
@@ -580,22 +591,33 @@ function formatInvitationDate() {
     }
   }
 
-  // Fallback default
-  if (!day) day = '20';
-  if (!month) month = '12';
-  if (!year) year = '2026';
-  if (!fullDateText) fullDateText = `${day} ${idMonths[parseInt(month, 10) - 1] || 'Desember'} ${year}`;
+  // Fallback default hanya jika BUKAN multi-tenant (halaman demo utama)
+  if (!isMultiTenant) {
+    if (!day) day = '20';
+    if (!month) month = '12';
+    if (!year) year = '2026';
+    if (!fullDateText) fullDateText = `${day} ${idMonths[parseInt(month, 10) - 1] || 'Desember'} ${year}`;
+    if (!dayName) dayName = 'Minggu';
+  }
 
   // Update Cover Date Text: "23 . 10 . 2026"
   const coverDateEl = document.getElementById('cover-date-text');
   if (coverDateEl) {
-    coverDateEl.textContent = `${day} . ${month} . ${year}`;
+    if (day && month && year) {
+      coverDateEl.textContent = `${day} . ${month} . ${year}`;
+    } else {
+      coverDateEl.textContent = '';
+    }
   }
 
-  // Update Hero Date Badge: "Jumat, 23 Oktober 2026"
+  // Update Hero Date Badge: "Jum'at, 23 Oktober 2026"
   const heroDateEl = document.getElementById('hero-date-badge');
   if (heroDateEl) {
-    heroDateEl.textContent = (dayName && !fullDateText.includes(dayName)) ? `${dayName}, ${fullDateText}` : fullDateText;
+    if (fullDateText) {
+      heroDateEl.textContent = (dayName && !fullDateText.includes(dayName)) ? `${dayName}, ${fullDateText}` : fullDateText;
+    } else {
+      heroDateEl.textContent = '';
+    }
   }
 }
 

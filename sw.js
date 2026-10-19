@@ -3,7 +3,7 @@
  * Memberikan dukungan instalasi mandiri dan caching offline
  */
 
-const CACHE_NAME = 'wedding-invitation-v1';
+const CACHE_NAME = 'wedding-invitation-v2';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -11,9 +11,6 @@ const PRECACHE_ASSETS = [
   './css/style.css',
   './js/app.js',
   './config.js',
-  './assets/images/couple_hero.jpg',
-  './assets/images/groom.jpg',
-  './assets/images/bride.jpg',
   './assets/images/qris.svg',
   './assets/images/pwa-icon.svg'
 ];
