@@ -4,11 +4,78 @@
  * ====================================================================
  */
 
+const SAAS_PLANS = {
+  silver: {
+    key: 'silver',
+    name: 'Paket Silver',
+    price: 49000,
+    priceFormatted: 'Rp 49.000',
+    duration: '3 Bulan'
+  },
+  gold: {
+    key: 'gold',
+    name: 'Paket Gold (Terpopuler)',
+    price: 99000,
+    priceFormatted: 'Rp 99.000',
+    duration: 'Selamanya (Lifetime)'
+  },
+  vip: {
+    key: 'vip',
+    name: 'Paket VIP Platinum',
+    price: 149000,
+    priceFormatted: 'Rp 149.000',
+    duration: 'Selamanya (Terima Beres)'
+  }
+};
+let selectedPlanKey = 'gold';
+
 document.addEventListener('DOMContentLoaded', () => {
   initFormInteractivity();
   initSlugChecker();
+  initPlanSelection();
   initRegistrationSubmit();
 });
+
+function initPlanSelection() {
+  const urlParamPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlParamPlan && SAAS_PLANS[urlParamPlan.toLowerCase()]) {
+    selectedPlanKey = urlParamPlan.toLowerCase();
+  }
+
+  updatePlanUI(selectedPlanKey);
+
+  const planCards = document.querySelectorAll('.plan-option-card');
+  planCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio && SAAS_PLANS[radio.value]) {
+        radio.checked = true;
+        selectedPlanKey = radio.value;
+        updatePlanUI(selectedPlanKey);
+      }
+    });
+  });
+}
+
+function updatePlanUI(planKey) {
+  const plan = SAAS_PLANS[planKey] || SAAS_PLANS.gold;
+  
+  // Update class active pada kartu opsi
+  document.querySelectorAll('.plan-option-card').forEach(card => {
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio) {
+      const isMatch = radio.value === plan.key;
+      card.classList.toggle('active', isMatch);
+      radio.checked = isMatch;
+    }
+  });
+
+  // Update teks tombol submit
+  const btnLabel = document.getElementById('btn-submit-label');
+  if (btnLabel) {
+    btnLabel.textContent = `✨ Terbitkan Undangan Saya Sekarang [${plan.name} - ${plan.priceFormatted}]`;
+  }
+}
 
 function initFormInteractivity() {
   const groomInput = document.getElementById('input-groom');
@@ -167,10 +234,7 @@ function initRegistrationSubmit() {
       ? WEDDING_CONFIG.appsScriptUrl 
       : 'https://script.google.com/macros/s/AKfycbylw1T_Lv0lxniv9-KowxxcGcYGQyb3WLTj30UQQMTsf7dvb460vFn50NY0TdFo2Tes/exec';
 
-    const urlPlan = new URLSearchParams(window.location.search).get('plan');
-    let planName = 'Paket Gold (Terpopuler)';
-    if (urlPlan === 'silver') planName = 'Paket Silver';
-    else if (urlPlan === 'vip') planName = 'Paket VIP Platinum';
+    const plan = SAAS_PLANS[selectedPlanKey] || SAAS_PLANS.gold;
 
     const payload = {
       action: 'register_user',
@@ -182,7 +246,8 @@ function initRegistrationSubmit() {
       email: email,
       pin: pin,
       weddingDate: date,
-      paket: planName,
+      paket: plan.name,
+      harga: plan.price,
       theme: new URLSearchParams(window.location.search).get('theme') || 'champagne'
     };
 
@@ -216,7 +281,7 @@ function initRegistrationSubmit() {
 
         // Simpan sesi pendaftaran sementara di sessionStorage
         sessionStorage.setItem('saas_last_registered', JSON.stringify({
-          slug, pin, namaPasangan: `${groom} & ${bride}`, guestLink, adminLink
+          slug, pin, namaPasangan: `${groom} & ${bride}`, guestLink, adminLink, plan: plan.name
         }));
 
         // Isi data modal
@@ -226,7 +291,28 @@ function initRegistrationSubmit() {
         document.getElementById('btn-to-admin').href = adminLink;
         document.getElementById('btn-to-guest').href = guestLink;
 
-        // Buka Modal Sukses
+        // Isi rincian checkout paket
+        const planNameEl = document.getElementById('modal-plan-name');
+        const planPriceEl = document.getElementById('modal-plan-price');
+        if (planNameEl) planNameEl.textContent = plan.name;
+        if (planPriceEl) planPriceEl.textContent = plan.priceFormatted;
+
+        // Generate tautan WhatsApp Konfirmasi Otomatis
+        const adminWa = '6281234567890';
+        const waMsg = `Halo Admin Khodim Undangan, saya telah mendaftar website undangan digital:\n\n` +
+          `💍 *Nama Pasangan:* ${groom} & ${bride}\n` +
+          `📦 *Paket Dipilih:* ${plan.name} (${plan.priceFormatted})\n` +
+          `🔗 *Tautan Undangan:* ${guestLink}\n` +
+          `🛠️ *Portal Editor:* ${adminLink}\n` +
+          `📱 *No. WhatsApp:* ${whatsapp}\n\n` +
+          `Saya ingin konfirmasi pembayaran dan aktivasi fitur. Mohon arahannya. Terima kasih!`;
+
+        const btnWa = document.getElementById('btn-whatsapp-confirm');
+        if (btnWa) {
+          btnWa.href = `https://wa.me/${adminWa}?text=${encodeURIComponent(waMsg)}`;
+        }
+
+        // Buka Modal Sukses & Checkout
         successModal?.classList.add('show');
       }
 
@@ -240,7 +326,7 @@ function initRegistrationSubmit() {
   });
 }
 
-// Salin tautan helper
+// Salin tautan input helper
 window.copyLinkToClipboard = function(inputId, btnEl) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -252,6 +338,23 @@ window.copyLinkToClipboard = function(inputId, btnEl) {
     setTimeout(() => {
       btnEl.innerHTML = originalText;
     }, 2000);
+  });
+};
+
+// Salin teks langsung helper (misal nomor rekening)
+window.copyTextToClipboard = function(text, btnEl) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    if (btnEl) {
+      const origText = btnEl.textContent;
+      btnEl.textContent = 'Tersalin ✓';
+      setTimeout(() => {
+        btnEl.textContent = origText;
+      }, 2000);
+    }
+    showToast(`Nomor ${text} berhasil disalin!`, 'success');
+  }).catch(() => {
+    showToast('Gagal menyalin.', 'error');
   });
 };
 

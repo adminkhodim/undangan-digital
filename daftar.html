@@ -161,9 +161,53 @@
             </small>
           </div>
 
+          <!-- Step 4: Pilih Paket Layanan -->
+          <div class="form-step-title" style="margin-top: 32px;">
+            <div class="step-number">4</div>
+            <div class="step-text">
+              <h3>Pilih Paket Layanan</h3>
+              <p>Pilih paket yang paling sesuai dengan kebutuhan acara pernikahan Anda</p>
+            </div>
+          </div>
+
+          <div class="plan-selection-grid">
+            <!-- Paket Silver -->
+            <label class="plan-option-card" id="plan-card-silver">
+              <input type="radio" name="input-plan" value="silver">
+              <div class="plan-card-header">
+                <span class="plan-name">Silver</span>
+                <span class="plan-badge">Hemat</span>
+              </div>
+              <div class="plan-price">Rp 49.000</div>
+              <div class="plan-desc">Aktif 3 bulan, RSVP Google Sheet, 5 foto galeri, amplop digital.</div>
+            </label>
+
+            <!-- Paket Gold (Default) -->
+            <label class="plan-option-card active" id="plan-card-gold">
+              <input type="radio" name="input-plan" value="gold" checked>
+              <div class="plan-card-header">
+                <span class="plan-name">Gold</span>
+                <span class="plan-badge popular">Terpopuler</span>
+              </div>
+              <div class="plan-price">Rp 99.000</div>
+              <div class="plan-desc">Aktif SELAMANYA, foto tanpa batas, custom musik, QRIS & WA generator.</div>
+            </label>
+
+            <!-- Paket VIP -->
+            <label class="plan-option-card" id="plan-card-vip">
+              <input type="radio" name="input-plan" value="vip">
+              <div class="plan-card-header">
+                <span class="plan-name">VIP Platinum</span>
+                <span class="plan-badge">Terima Beres</span>
+              </div>
+              <div class="plan-price">Rp 149.000</div>
+              <div class="plan-desc">Semua fitur Gold + layanan input data oleh tim, revisi sepuasnya & prioritas 24/7.</div>
+            </label>
+          </div>
+
           <!-- Submit Button -->
           <button type="submit" id="btn-submit" class="btn-submit-register">
-            <span>✨ Terbitkan Undangan Saya Sekarang</span>
+            <span id="btn-submit-label">✨ Terbitkan Undangan Saya Sekarang [Paket Gold - Rp 99.000]</span>
             <i class="fa-solid fa-arrow-right"></i>
           </button>
         </form>
@@ -259,6 +303,43 @@
             <button type="button" class="btn-copy" onclick="copyLinkToClipboard('modal-admin-url', this)">Salin</button>
           </div>
         </div>
+      </div>
+
+      <!-- Kotak Tagihan & Konfirmasi Pembayaran WhatsApp -->
+      <div class="checkout-summary-box">
+        <div class="checkout-header">
+          <div class="checkout-plan-info">
+            <span class="checkout-label">Paket Dipilih:</span>
+            <strong id="modal-plan-name" class="checkout-plan-title">Paket Gold (Terpopuler)</strong>
+          </div>
+          <div class="checkout-amount" id="modal-plan-price">Rp 99.000</div>
+        </div>
+
+        <div class="checkout-bank-details">
+          <div class="bank-title"><i class="fa-solid fa-credit-card"></i> Rekening Pembayaran Resmi:</div>
+          <div class="bank-row">
+            <span>Bank Central Asia (BCA)</span>
+            <strong>1234567890 <button type="button" class="btn-mini-copy" onclick="copyTextToClipboard('1234567890', this)">Salin</button></strong>
+          </div>
+          <div class="bank-row">
+            <span>Bank Mandiri</span>
+            <strong>1370012345678 <button type="button" class="btn-mini-copy" onclick="copyTextToClipboard('1370012345678', this)">Salin</button></strong>
+          </div>
+          <div class="bank-row">
+            <span>Bank Syariah Indonesia (BSI)</span>
+            <strong>7123456789 <button type="button" class="btn-mini-copy" onclick="copyTextToClipboard('7123456789', this)">Salin</button></strong>
+          </div>
+          <div class="bank-row">
+            <span>Atas Nama:</span>
+            <strong>Khodim Digital</strong>
+          </div>
+        </div>
+
+        <!-- Tombol Konfirmasi WhatsApp -->
+        <a href="#" id="btn-whatsapp-confirm" target="_blank" class="btn-whatsapp-confirm">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Konfirmasi Pembayaran ke WhatsApp Admin</span>
+        </a>
       </div>
 
       <div class="modal-action-buttons">
