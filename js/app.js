@@ -5,8 +5,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. Sinkronisasi Custom Config dari Portal Editor jika tersimpan di LocalStorage
-  const customConfigStr = localStorage.getItem('wedding_custom_config');
+  // 0. Deteksi Tenant SaaS dari URL Query (?u=slug)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantSlug = urlParams.get('u') || urlParams.get('slug') || '';
+  const tenantStorageKey = tenantSlug ? `wedding_custom_config_${tenantSlug}` : 'wedding_custom_config';
+
+  // Sinkronisasi Custom Config dari LocalStorage jika ada
+  const customConfigStr = localStorage.getItem(tenantStorageKey);
   if (customConfigStr) {
     try {
       const parsedConfig = JSON.parse(customConfigStr);
@@ -22,14 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Tarik update konfigurasi terbaru dari Google Spreadsheet (Cloud) jika online
+  // Tarik update konfigurasi terbaru dari Google Spreadsheet (Cloud Multi-Tenant)
   if (WEDDING_CONFIG.appsScriptUrl) {
-    fetch(WEDDING_CONFIG.appsScriptUrl + '?action=get_config')
+    const tenantParam = tenantSlug ? `&u=${encodeURIComponent(tenantSlug)}` : '';
+    fetch(`${WEDDING_CONFIG.appsScriptUrl}?action=get_config${tenantParam}`)
       .then(r => r.json())
       .then(res => {
         if (res && res.status === 'success' && res.config) {
           const cloudConfig = res.config;
-          localStorage.setItem('wedding_custom_config', JSON.stringify(cloudConfig));
+          localStorage.setItem(tenantStorageKey, JSON.stringify(cloudConfig));
           Object.assign(WEDDING_CONFIG, cloudConfig);
           if (cloudConfig.couple) {
             WEDDING_CONFIG.couple = cloudConfig.couple;
@@ -37,6 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
             WEDDING_CONFIG.bride = cloudConfig.couple.bride;
             WEDDING_CONFIG.heroPhoto = cloudConfig.couple.heroPhoto;
           }
+
+          // Perbarui judul tab browser sesuai nama pasangan
+          const groomName = (cloudConfig.groom && (cloudConfig.groom.shortName || cloudConfig.groom.fullName)) || 'Arya';
+          const brideName = (cloudConfig.bride && (cloudConfig.bride.shortName || cloudConfig.bride.fullName)) || 'Annisa';
+          document.title = `The Wedding of ${groomName} & ${brideName}`;
+
           // Perbarui tampilan dengan data terbaru dari cloud
           try {
             initCoupleData();
@@ -748,29 +760,32 @@ function showToast(message) {
 /* ====================================================================
    10. RSVP & BUKU DOA (GOOGLE APPS SCRIPT + LOCALSTORAGE CACHE)
    ==================================================================== */
-const STORAGE_KEY = 'wedding_wishes_arya_annisa';
-
 function initRSVP() {
   const form = document.getElementById('rsvp-form');
   const wishesContainer = document.getElementById('wishes-container');
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantSlug = urlParams.get('u') || urlParams.get('slug') || '';
+  const tenantWishesKey = tenantSlug ? `wedding_wishes_${tenantSlug}` : 'wedding_wishes_arya_annisa';
+
   // 1. Tampilkan data dari cache lokal / initialWishes langsung (tanpa loading delay)
-  let storedWishes = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  let storedWishes = JSON.parse(localStorage.getItem(tenantWishesKey));
   if (!storedWishes || !Array.isArray(storedWishes) || storedWishes.length === 0) {
     storedWishes = WEDDING_CONFIG.initialWishes || [];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedWishes));
+    localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
   }
 
   renderWishes(storedWishes);
 
   // 2. Sinkronkan dengan database Google Spreadsheet secara asynchronous jika ada endpoint Apps Script
   if (WEDDING_CONFIG.appsScriptUrl) {
-    fetch(WEDDING_CONFIG.appsScriptUrl)
+    const tenantParam = tenantSlug ? `?action=get_wishes&u=${encodeURIComponent(tenantSlug)}` : '';
+    fetch(`${WEDDING_CONFIG.appsScriptUrl}${tenantParam}`)
       .then(res => res.json())
       .then(result => {
         if (result && result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
           storedWishes = result.data;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(storedWishes));
+          localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
           renderWishes(storedWishes);
         }
       })
@@ -806,7 +821,7 @@ function initRSVP() {
       };
 
       storedWishes.unshift(newWish);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedWishes));
+      localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
       renderWishes(storedWishes);
 
       // Reset form
@@ -822,12 +837,16 @@ function initRSVP() {
 
       showToast('Mengirimkan ucapan & doa restu Anda...');
 
-      // Kirim ke Google Apps Script (Google Sheets)
+      // Kirim ke Google Apps Script (Google Sheets tenant)
       if (WEDDING_CONFIG.appsScriptUrl) {
         try {
+          const payload = Object.assign({}, newWish, {
+            action: 'rsvp',
+            u: tenantSlug
+          });
           const response = await fetch(WEDDING_CONFIG.appsScriptUrl, {
             method: 'POST',
-            body: JSON.stringify(newWish)
+            body: JSON.stringify(payload)
           });
           const resJson = await response.json();
           if (resJson && resJson.status === 'success') {

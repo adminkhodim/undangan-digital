@@ -30,18 +30,37 @@ var THEME = {
  */
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'get_wishes';
+  var slug = (e && e.parameter && (e.parameter.u || e.parameter.slug)) ? (e.parameter.u || e.parameter.slug).toLowerCase().trim() : '';
 
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var tenantInfo = getTenantInfo(ss, slug);
+    var targetSs = getTenantSpreadsheet(ss, slug);
 
+    // 1. Ambil Konfigurasi Undangan (Support Multi-Tenant ?u=slug)
     if (action === 'get_config') {
-      var configData = readAllConfigFromSheets(ss);
+      var configData = readAllConfigFromSheets(targetSs);
       return createJsonResponse({
         status: 'success',
+        tenant: tenantInfo.slug || CONFIG.DEFAULT_SLUG,
+        namaPasangan: tenantInfo.namaPasangan || '',
         config: configData
       });
     }
 
+    // 2. Verifikasi PIN Admin untuk Portal Editor
+    if (action === 'verify_pin') {
+      var reqPin = (e && e.parameter && e.parameter.pin) ? e.parameter.pin.toString().trim() : '';
+      var isPinValid = tenantInfo.found && (tenantInfo.pin ? tenantInfo.pin.toString().trim() === reqPin : true);
+      return createJsonResponse({
+        status: 'success',
+        verified: isPinValid,
+        slug: tenantInfo.slug,
+        namaPasangan: tenantInfo.namaPasangan || ''
+      });
+    }
+
+    // 3. Inisialisasi / Rapikan Tab
     if (action === 'init_tabs' || action === 'rapikan_sheet') {
       initAllTabs(ss);
       return createJsonResponse({
@@ -50,6 +69,7 @@ function doGet(e) {
       });
     }
 
+    // 4. Cek Ketersediaan Slug
     if (action === 'check_slug') {
       var checkSlug = (e && e.parameter && e.parameter.slug) ? e.parameter.slug.toLowerCase().trim() : '';
       var isAvailable = isSlugAvailable(ss, checkSlug);
@@ -60,10 +80,11 @@ function doGet(e) {
       });
     }
 
-    // Default: Ambil data ucapan / RSVP untuk buku tamu
-    var wishes = readRSVPData(ss);
+    // 5. Default: Ambil data ucapan / RSVP untuk buku tamu tenant
+    var wishes = readRSVPData(targetSs);
     return createJsonResponse({
       status: 'success',
+      tenant: tenantInfo.slug,
       total: wishes.length,
       data: wishes
     });
@@ -88,7 +109,6 @@ function doPost(e) {
       try {
         postData = JSON.parse(e.postData.contents);
       } catch (parseErr) {
-        // Fallback jika dikirim via URL encoded form
         postData = e.parameter || {};
       }
     } else {
@@ -96,27 +116,33 @@ function doPost(e) {
     }
 
     var action = postData.action || 'rsvp';
+    var slug = postData.u || postData.slug || (e && e.parameter && (e.parameter.u || e.parameter.slug)) || '';
+    var tenantInfo = getTenantInfo(ss, slug);
+    var targetSs = getTenantSpreadsheet(ss, slug);
 
-    // 1. SIMPAN SELURUH KONFIGURASI KE TAB TERSTRUKTUR
+    // 1. SIMPAN KONFIGURASI KE SHEET TENANT
     if (action === 'save_config') {
       var cfg = postData.config;
       if (!cfg) throw new Error('Data konfigurasi kosong.');
-      saveAllConfigToSheets(ss, cfg);
+      saveAllConfigToSheets(targetSs, cfg);
       return createJsonResponse({
         status: 'success',
-        message: 'Konfigurasi berhasil disimpan ke seluruh tab sheet secara terstruktur!'
+        tenant: tenantInfo.slug,
+        message: 'Konfigurasi berhasil disimpan ke sheet pasangan ' + (tenantInfo.namaPasangan || tenantInfo.slug) + '!'
       });
     }
 
-    // 2. UPLOAD FOTO KE GOOGLE DRIVE
+    // 2. UPLOAD FOTO KE GOOGLE DRIVE TENANT
     if (action === 'upload_image') {
       var filename = postData.filename || ('foto_' + new Date().getTime() + '.jpg');
       var dataUrl = postData.dataUrl;
       if (!dataUrl) throw new Error('dataUrl gambar tidak ditemukan.');
 
-      var uploadedUrl = uploadBase64ToDrive(CONFIG.DRIVE_FOLDER_ID, filename, dataUrl);
+      var targetFolderId = tenantInfo.driveFolderId || CONFIG.DRIVE_FOLDER_ID;
+      var uploadedUrl = uploadBase64ToDrive(targetFolderId, filename, dataUrl);
       return createJsonResponse({
         status: 'success',
+        tenant: tenantInfo.slug,
         fileUrl: uploadedUrl,
         message: 'Foto berhasil diunggah ke Google Drive!'
       });
@@ -124,7 +150,7 @@ function doPost(e) {
 
     // 3. TAMBAH UCAPAN / RSVP BARU DARI TAMU
     if (action === 'rsvp') {
-      var rsvpSheet = getOrCreateSheet(ss, 'Buku_Tamu_RSVP', [
+      var rsvpSheet = getOrCreateSheet(targetSs, 'Buku_Tamu_RSVP', [
         'Waktu', 'Nama Tamu', 'Konfirmasi Kehadiran', 'Jumlah Tamu', 'Ucapan / Doa Restu'
       ]);
 
@@ -138,24 +164,25 @@ function doPost(e) {
 
       return createJsonResponse({
         status: 'success',
+        tenant: tenantInfo.slug,
         message: 'Terima kasih, ucapan dan konfirmasi kehadiran Anda berhasil disimpan!'
       });
     }
 
-    // 4. DAFTAR PENGGUNA BARU (SAAS REGISTRATION)
+    // 4. DAFTAR PENGGUNA BARU (AUTOMATED SAAS PROVISIONING)
     if (action === 'register_user') {
       var sUsers = getOrCreateSheet(ss, 'Data_Pengguna', [
         'ID_User', 'Tanggal_Daftar', 'Nama_Pasangan', 'Slug_Undangan', 
         'Email', 'No_WhatsApp', 'PIN_Admin', 'Paket', 'Status', 'Spreadsheet_ID', 'Drive_Folder_ID'
       ]);
 
-      var slug = (postData.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '').trim();
-      if (!slug) throw new Error('Tautan slug undangan wajib diisi.');
+      var newSlug = (postData.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '').trim();
+      if (!newSlug) throw new Error('Tautan slug undangan wajib diisi.');
 
-      if (!isSlugAvailable(ss, slug)) {
+      if (!isSlugAvailable(ss, newSlug)) {
         return createJsonResponse({
           status: 'error',
-          message: 'Tautan slug "' + slug + '" sudah digunakan oleh pasangan lain. Silakan pilih slug lain.'
+          message: 'Tautan slug "' + newSlug + '" sudah digunakan oleh pasangan lain. Silakan pilih slug lain.'
         });
       }
 
@@ -165,24 +192,81 @@ function doPost(e) {
       var email = postData.email || '';
       var whatsapp = postData.whatsapp || '';
       var pin = postData.pin || '123456';
-      var paket = postData.paket || 'Starter Free';
+      var weddingDate = postData.weddingDate || '2026-12-20';
+      var paket = postData.paket || 'VIP Digital Gold';
       var statusUser = 'Aktif';
 
       var newUserId = 'USR-' + Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyMM') + '-' + Math.floor(100 + Math.random() * 900);
       var regDate = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss');
 
+      // 1. Buat folder Google Drive khusus untuk foto pasangan ini
+      var clientFolderId = CONFIG.DRIVE_FOLDER_ID;
+      try {
+        var parentFolder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+        var newFolder = parentFolder.createFolder('Undangan ' + namaPasangan + ' (' + newSlug + ')');
+        newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        clientFolderId = newFolder.getId();
+      } catch (fErr) {
+        Logger.log('Gagal buat subfolder Drive: ' + fErr);
+      }
+
+      // 2. Kloning Master Spreadsheet menjadi spreadsheet khusus pasangan ini
+      var clientSsId = ss.getId();
+      try {
+        var masterFile = DriveApp.getFileById(ss.getId());
+        var copiedFile = masterFile.makeCopy('Undangan Digital - ' + namaPasangan, DriveApp.getFolderById(clientFolderId));
+        clientSsId = copiedFile.getId();
+        
+        var clientSs = SpreadsheetApp.openById(clientSsId);
+        
+        // Hapus tab Data_Pengguna di file klien
+        var sClientUsers = clientSs.getSheetByName('Data_Pengguna');
+        if (sClientUsers) {
+          try { clientSs.deleteSheet(sClientUsers); } catch(e){}
+        }
+
+        // Sesuaikan nama mempelai awal di tab Mempelai
+        var sClientMempelai = clientSs.getSheetByName('Mempelai');
+        if (sClientMempelai) {
+          clearDataRows(sClientMempelai);
+          sClientMempelai.appendRow(['Mempelai Pria', namaPria, namaPria, 'Putra dari', '-', '-', '', 'assets/images/groom.jpg', '']);
+          sClientMempelai.appendRow(['Mempelai Wanita', namaWanita, namaWanita, 'Putri dari', '-', '-', '', 'assets/images/bride.jpg', '']);
+          sClientMempelai.appendRow(['Foto Hero Bersama', '-', '-', '-', '-', '-', '', 'assets/images/couple_hero.jpg', 'Foto Utama Undangan']);
+        }
+
+        // Sesuaikan tanggal pernikahan di Pengaturan_Umum
+        var sClientSettings = clientSs.getSheetByName('Pengaturan_Umum');
+        if (sClientSettings) {
+          clearDataRows(sClientSettings);
+          sClientSettings.appendRow(['targetDate', weddingDate + 'T08:00:00', 'Waktu target hitung mundur']);
+          sClientSettings.appendRow(['autoScrollSpeed', 2.8, 'Kecepatan autoscroll peramban']);
+          sClientSettings.appendRow(['autoScrollAutoStart', 'true', 'Mulai autoscroll otomatis']);
+          sClientSettings.appendRow(['slug_undangan', newSlug, 'Identifier unik tenant']);
+        }
+
+        // Bersihkan data ucapan awal
+        var sClientRsvp = clientSs.getSheetByName('Buku_Tamu_RSVP');
+        if (sClientRsvp) {
+          clearDataRows(sClientRsvp);
+        }
+
+      } catch (cpErr) {
+        Logger.log('Gagal kloning spreadsheet: ' + cpErr);
+      }
+
+      // 3. Catat ke Master Sheet Data_Pengguna
       sUsers.appendRow([
         newUserId,
         regDate,
         namaPasangan,
-        slug,
+        newSlug,
         email,
         whatsapp,
         pin,
         paket,
         statusUser,
-        ss.getId(),
-        CONFIG.DRIVE_FOLDER_ID
+        clientSsId,
+        clientFolderId
       ]);
 
       return createJsonResponse({
@@ -191,9 +275,11 @@ function doPost(e) {
         user: {
           id: newUserId,
           namaPasangan: namaPasangan,
-          slug: slug,
-          adminUrl: 'admin.html?u=' + slug,
-          guestUrl: 'index.html?u=' + slug
+          slug: newSlug,
+          spreadsheetId: clientSsId,
+          driveFolderId: clientFolderId,
+          adminUrl: 'admin.html?u=' + newSlug,
+          guestUrl: 'index.html?u=' + newSlug
         }
       });
     }
@@ -209,6 +295,68 @@ function doPost(e) {
       message: err.toString()
     });
   }
+}
+
+/* ====================================================================
+   SAAS TENANT HELPERS
+   ==================================================================== */
+function getTenantInfo(masterSs, slug) {
+  if (!masterSs) masterSs = SpreadsheetApp.getActiveSpreadsheet();
+  slug = (slug || '').toString().toLowerCase().trim();
+
+  var defaultTenant = {
+    found: true,
+    slug: CONFIG.DEFAULT_SLUG,
+    namaPasangan: 'Raden Arya & Annisa Larasati',
+    pin: '123456',
+    spreadsheetId: masterSs.getId(),
+    driveFolderId: CONFIG.DRIVE_FOLDER_ID
+  };
+
+  if (!slug || slug === CONFIG.DEFAULT_SLUG) {
+    return defaultTenant;
+  }
+
+  var sUsers = masterSs.getSheetByName('Data_Pengguna');
+  if (!sUsers || sUsers.getLastRow() <= 1) {
+    return defaultTenant;
+  }
+
+  var rows = sUsers.getRange(2, 1, sUsers.getLastRow() - 1, sUsers.getLastColumn()).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var rowSlug = (r[3] || '').toString().toLowerCase().trim();
+    if (rowSlug === slug) {
+      return {
+        found: true,
+        id: r[0],
+        tanggal: r[1],
+        namaPasangan: r[2],
+        slug: rowSlug,
+        email: r[4],
+        whatsapp: r[5],
+        pin: r[6],
+        paket: r[7],
+        status: r[8],
+        spreadsheetId: r[9] || masterSs.getId(),
+        driveFolderId: r[10] || CONFIG.DRIVE_FOLDER_ID
+      };
+    }
+  }
+
+  return { found: false, slug: slug };
+}
+
+function getTenantSpreadsheet(masterSs, slug) {
+  var tenant = getTenantInfo(masterSs, slug);
+  if (tenant.found && tenant.spreadsheetId && tenant.spreadsheetId !== masterSs.getId()) {
+    try {
+      return SpreadsheetApp.openById(tenant.spreadsheetId);
+    } catch (e) {
+      Logger.log('Gagal buka spreadsheet tenant ' + slug + ', fallback ke master: ' + e);
+    }
+  }
+  return masterSs;
 }
 
 /* ====================================================================

@@ -1,16 +1,23 @@
 /**
  * ====================================================================
- * LOGIKA PORTAL EDITOR & ADMIN UNDANGAN DIGITAL
+ * LOGIKA PORTAL EDITOR & ADMIN UNDANGAN DIGITAL (SAAS MULTI-TENANT)
  * ====================================================================
  */
 
+// 0. Deteksi Tenant Pasangan dari URL Query (?u=slug)
+const urlParams = new URLSearchParams(window.location.search);
+const tenantSlug = (urlParams.get('u') || urlParams.get('slug') || '').toLowerCase().trim();
+const STORAGE_CONFIG_KEY = tenantSlug ? `wedding_custom_config_${tenantSlug}` : 'wedding_custom_config';
+const STORAGE_WISHES_KEY = tenantSlug ? `wedding_wishes_${tenantSlug}` : 'wedding_wishes_arya_annisa';
+
 let currentConfig = null;
-const STORAGE_CONFIG_KEY = 'wedding_custom_config';
-const STORAGE_WISHES_KEY = 'wedding_wishes_arya_annisa';
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTenantHeader();
   initTabs();
-  loadConfig();
+  checkTenantPinProtection(() => {
+    loadConfig();
+  });
   initDynamicListControls();
   initSaveButton();
   initDownloadButton();
@@ -20,6 +27,68 @@ document.addEventListener('DOMContentLoaded', () => {
   initImageUploaders();
   initAutoScrollAdminControls();
 });
+
+/* ====================================================================
+   0. INISIALISASI IDENTITAS TENANT & KEAMANAN PIN
+   ==================================================================== */
+function initTenantHeader() {
+  const subtitleEl = document.querySelector('.brand-subtitle');
+  if (subtitleEl && tenantSlug) {
+    subtitleEl.innerHTML = `Kelola Undangan: <strong style="color:var(--primary); font-family:monospace; background:rgba(197,160,89,0.15); padding:2px 8px; border-radius:6px;">${tenantSlug}</strong>`;
+  }
+
+  // Sesuaikan link pratinjau agar membuka undangan pasangan yang bersangkutan
+  const previewLink = document.querySelector('a.btn-secondary[title*="Pratinjau"]');
+  if (previewLink && tenantSlug) {
+    previewLink.href = `index.html?u=${encodeURIComponent(tenantSlug)}`;
+  }
+}
+
+function checkTenantPinProtection(onVerified) {
+  // Jika tenant adalah default master (arya-annisa) atau kosong, tidak perlu PIN
+  if (!tenantSlug || tenantSlug === 'arya-annisa') {
+    if (onVerified) onVerified();
+    return;
+  }
+
+  const sessionKey = `pin_verified_${tenantSlug}`;
+  if (sessionStorage.getItem(sessionKey) === 'true') {
+    if (onVerified) onVerified();
+    return;
+  }
+
+  // Tampilkan dialog PIN
+  const userPin = prompt(`Portal Admin Pasangan [${tenantSlug}]:\nMasukkan 6-digit PIN Keamanan Anda untuk mengelola undangan:`);
+  if (!userPin) {
+    alert('Akses dibatalkan. Anda akan dialihkan ke halaman utama.');
+    window.location.href = `index.html?u=${encodeURIComponent(tenantSlug)}`;
+    return;
+  }
+
+  // Verifikasi ke backend
+  if (WEDDING_CONFIG.appsScriptUrl) {
+    fetch(`${WEDDING_CONFIG.appsScriptUrl}?action=verify_pin&u=${encodeURIComponent(tenantSlug)}&pin=${encodeURIComponent(userPin)}`)
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.verified) {
+          sessionStorage.setItem(sessionKey, 'true');
+          showAdminToast(`Selamat datang, ${res.namaPasangan || tenantSlug}!`, 'success');
+          if (onVerified) onVerified();
+        } else {
+          alert('PIN Keamanan yang Anda masukkan salah.');
+          window.location.reload();
+        }
+      })
+      .catch(() => {
+        // Fallback jika offline
+        sessionStorage.setItem(sessionKey, 'true');
+        if (onVerified) onVerified();
+      });
+  } else {
+    sessionStorage.setItem(sessionKey, 'true');
+    if (onVerified) onVerified();
+  }
+}
 
 /* ====================================================================
    1. TAB SWITCHING
@@ -154,9 +223,10 @@ function loadConfig() {
 
   populateForm(currentConfig);
 
-  // 2. Tarik konfigurasi terbaru dari Google Spreadsheet (Cloud) jika tersedia
+  // 2. Tarik konfigurasi terbaru dari Google Spreadsheet (Cloud Multi-Tenant) jika tersedia
   if (WEDDING_CONFIG.appsScriptUrl) {
-    fetch(WEDDING_CONFIG.appsScriptUrl + '?action=get_config')
+    const tenantParam = tenantSlug ? `&u=${encodeURIComponent(tenantSlug)}` : '';
+    fetch(`${WEDDING_CONFIG.appsScriptUrl}?action=get_config${tenantParam}`)
       .then(res => res.json())
       .then(resJson => {
         if (resJson && resJson.status === 'success' && resJson.config) {
@@ -667,6 +737,7 @@ function initSaveButton() {
           method: 'POST',
           body: JSON.stringify({
             action: 'save_config',
+            u: tenantSlug,
             config: updated
           })
         });
@@ -898,7 +969,8 @@ function updateGuestSharePreview() {
 
   // Base URL
   const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', '').replace('admin', '');
-  const guestUrl = `${baseUrl.replace(/\/$/, '')}/?to=${encodeURIComponent(guestName)}`;
+  const tenantParam = tenantSlug ? `u=${encodeURIComponent(tenantSlug)}&` : '';
+  const guestUrl = `${baseUrl.replace(/\/$/, '')}/?${tenantParam}to=${encodeURIComponent(guestName)}`;
 
   const linkInput = document.getElementById('gen-guest-link');
   if (linkInput) linkInput.value = guestUrl;
@@ -957,7 +1029,8 @@ function initRSVPManagement() {
     btnSync.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menarik Data...';
 
     try {
-      const response = await fetch(WEDDING_CONFIG.appsScriptUrl);
+      const tenantParam = tenantSlug ? `?action=get_wishes&u=${encodeURIComponent(tenantSlug)}` : '';
+      const response = await fetch(`${WEDDING_CONFIG.appsScriptUrl}${tenantParam}`);
       const resJson = await response.json();
       if (resJson && resJson.status === 'success' && Array.isArray(resJson.data)) {
         localStorage.setItem(STORAGE_WISHES_KEY, JSON.stringify(resJson.data));
@@ -1120,6 +1193,7 @@ function initImageUploaders() {
               method: 'POST',
               body: JSON.stringify({
                 action: 'upload_image',
+                u: tenantSlug,
                 filename: file.name,
                 dataUrl: dataUrl
               })
