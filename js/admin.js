@@ -45,49 +45,240 @@ function initTenantHeader() {
   }
 }
 
+let pendingOnVerifiedCallback = null;
+
 function checkTenantPinProtection(onVerified) {
-  // Jika tenant adalah default master (arya-annisa) atau kosong, tidak perlu PIN
-  if (!tenantSlug || tenantSlug === 'arya-annisa') {
-    if (onVerified) onVerified();
+  pendingOnVerifiedCallback = onVerified;
+
+  // Skenario 1: Jika user masuk langsung ke admin.html tanpa parameter (?u= atau ?slug=)
+  if (!tenantSlug) {
+    openAuthModal('login');
     return;
   }
 
+  // Skenario 2: Jika tenant sudah terverifikasi di sesi browser saat ini
   const sessionKey = `pin_verified_${tenantSlug}`;
   if (sessionStorage.getItem(sessionKey) === 'true') {
+    closeAuthModal();
     if (onVerified) onVerified();
     return;
   }
 
-  // Tampilkan dialog PIN
-  const userPin = prompt(`Portal Admin Pasangan [${tenantSlug}]:\nMasukkan 6-digit PIN Keamanan Anda untuk mengelola undangan:`);
-  if (!userPin) {
-    alert('Akses dibatalkan. Anda akan dialihkan ke halaman utama.');
-    window.location.href = `undangan.html?u=${encodeURIComponent(tenantSlug)}`;
-    return;
-  }
+  // Skenario 3: Ada tenant slug, buka Modal Glassmorphism PIN
+  openAuthModal('pin', tenantSlug);
+}
 
-  // Verifikasi ke backend
-  if (WEDDING_CONFIG.appsScriptUrl) {
-    fetch(`${WEDDING_CONFIG.appsScriptUrl}?action=verify_pin&u=${encodeURIComponent(tenantSlug)}&pin=${encodeURIComponent(userPin)}`)
-      .then(r => r.json())
-      .then(res => {
-        if (res && res.verified) {
-          sessionStorage.setItem(sessionKey, 'true');
-          showAdminToast(`Selamat datang, ${res.namaPasangan || tenantSlug}!`, 'success');
-          if (onVerified) onVerified();
-        } else {
-          alert('PIN Keamanan yang Anda masukkan salah.');
-          window.location.reload();
-        }
-      })
-      .catch(() => {
-        // Fallback jika offline
-        sessionStorage.setItem(sessionKey, 'true');
-        if (onVerified) onVerified();
-      });
+function openAuthModal(mode, slug) {
+  const modal = document.getElementById('admin-auth-modal');
+  const modePin = document.getElementById('auth-mode-pin');
+  const modeLogin = document.getElementById('auth-mode-login');
+  if (!modal) return;
+
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  if (mode === 'pin') {
+    if (modePin) modePin.style.display = 'block';
+    if (modeLogin) modeLogin.style.display = 'none';
+
+    const activeSlug = slug || tenantSlug || 'arya-annisa';
+    const tenantNameEl = document.getElementById('auth-tenant-name');
+    if (tenantNameEl) tenantNameEl.textContent = activeSlug;
+
+    const waLink = document.getElementById('auth-wa-help-link');
+    if (waLink) {
+      waLink.href = `https://wa.me/6285385515582?text=${encodeURIComponent('Halo Admin Khodim Undangan, saya lupa PIN admin untuk undangan ' + activeSlug + '. Mohon bantuannya.')}`;
+    }
+
+    const pinInput = document.getElementById('auth-input-pin');
+    if (pinInput) {
+      pinInput.value = '';
+      setTimeout(() => pinInput.focus(), 300);
+    }
+    hideAuthError('pin');
   } else {
-    sessionStorage.setItem(sessionKey, 'true');
-    if (onVerified) onVerified();
+    if (modePin) modePin.style.display = 'none';
+    if (modeLogin) modeLogin.style.display = 'block';
+
+    const slugInput = document.getElementById('auth-input-slug');
+    const pinInput = document.getElementById('auth-input-login-pin');
+    if (slugInput) {
+      slugInput.value = '';
+      setTimeout(() => slugInput.focus(), 300);
+    }
+    if (pinInput) pinInput.value = '';
+    hideAuthError('login');
+  }
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('admin-auth-modal');
+  if (modal) modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function switchToLoginMode() {
+  openAuthModal('login');
+}
+
+function switchToPinMode(slug) {
+  openAuthModal('pin', slug);
+}
+
+function togglePinVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  btn.innerHTML = isPassword ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+}
+
+function showAuthError(mode, message) {
+  const errBox = document.getElementById(`auth-${mode}-error`);
+  const errText = document.getElementById(`auth-${mode}-error-text`);
+  if (errBox && errText) {
+    errText.textContent = message;
+    errBox.style.display = 'flex';
+  }
+}
+
+function hideAuthError(mode) {
+  const errBox = document.getElementById(`auth-${mode}-error`);
+  if (errBox) errBox.style.display = 'none';
+}
+
+async function handlePinSubmit(e) {
+  e.preventDefault();
+  const pinInput = document.getElementById('auth-input-pin');
+  const btnSubmit = document.getElementById('btn-submit-pin');
+  if (!pinInput || !btnSubmit) return;
+
+  const pin = pinInput.value.trim();
+  if (!pin || pin.length < 4) {
+    showAuthError('pin', 'PIN Keamanan minimal 4 digit.');
+    return;
+  }
+
+  const originalHtml = btnSubmit.innerHTML;
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa PIN...';
+  hideAuthError('pin');
+
+  const activeSlug = tenantSlug || document.getElementById('auth-tenant-name')?.textContent || 'arya-annisa';
+  const appsScriptUrl = (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.appsScriptUrl) 
+    ? WEDDING_CONFIG.appsScriptUrl 
+    : '';
+
+  try {
+    let verified = false;
+    let coupleName = activeSlug;
+
+    if (appsScriptUrl) {
+      const res = await fetch(`${appsScriptUrl}?action=verify_pin&u=${encodeURIComponent(activeSlug)}&pin=${encodeURIComponent(pin)}`);
+      const data = await res.json();
+      if (data && data.status === 'success' && data.verified) {
+        verified = true;
+        if (data.namaPasangan) coupleName = data.namaPasangan;
+      }
+    } else {
+      // Fallback offline
+      verified = true;
+    }
+
+    if (verified) {
+      sessionStorage.setItem(`pin_verified_${activeSlug}`, 'true');
+      closeAuthModal();
+      showAdminToast(`Selamat datang, ${coupleName}!`, 'success');
+      if (pendingOnVerifiedCallback) {
+        pendingOnVerifiedCallback();
+      } else {
+        loadConfig();
+      }
+    } else {
+      showAuthError('pin', 'PIN Keamanan salah. Periksa kembali atau hubungi admin.');
+      pinInput.select();
+    }
+  } catch (err) {
+    console.error('Error verifikasi PIN:', err);
+    showAuthError('pin', 'Koneksi terganggu. Silakan coba kembali.');
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = originalHtml;
+  }
+}
+
+async function handleFullLoginSubmit(e) {
+  e.preventDefault();
+  const slugInput = document.getElementById('auth-input-slug');
+  const pinInput = document.getElementById('auth-input-login-pin');
+  const btnSubmit = document.getElementById('btn-submit-login');
+  if (!slugInput || !pinInput || !btnSubmit) return;
+
+  const slug = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '').trim();
+  const pin = pinInput.value.trim();
+
+  if (!slug) {
+    showAuthError('login', 'Tautan slug undangan wajib diisi.');
+    return;
+  }
+  if (!pin || pin.length < 4) {
+    showAuthError('login', 'PIN Keamanan minimal 4 digit.');
+    return;
+  }
+
+  const originalHtml = btnSubmit.innerHTML;
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa Data...';
+  hideAuthError('login');
+
+  const appsScriptUrl = (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.appsScriptUrl) 
+    ? WEDDING_CONFIG.appsScriptUrl 
+    : '';
+
+  try {
+    let verified = false;
+    let coupleName = slug;
+
+    if (appsScriptUrl) {
+      const res = await fetch(`${appsScriptUrl}?action=verify_pin&u=${encodeURIComponent(slug)}&pin=${encodeURIComponent(pin)}`);
+      const data = await res.json();
+      if (data && data.status === 'success' && data.verified) {
+        verified = true;
+        if (data.namaPasangan) coupleName = data.namaPasangan;
+      }
+    } else {
+      verified = true;
+    }
+
+    if (verified) {
+      sessionStorage.setItem(`pin_verified_${slug}`, 'true');
+      // Alihkan ke URL tenant
+      window.location.href = `admin.html?u=${encodeURIComponent(slug)}`;
+    } else {
+      showAuthError('login', 'Tautan slug atau PIN tidak ditemukan / tidak cocok.');
+      pinInput.select();
+    }
+  } catch (err) {
+    console.error('Error login:', err);
+    showAuthError('login', 'Koneksi terganggu. Silakan coba lagi.');
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = originalHtml;
+  }
+}
+
+function loginAsDemo() {
+  sessionStorage.setItem('pin_verified_arya-annisa', 'true');
+  window.location.href = 'admin.html?u=arya-annisa';
+}
+
+function logoutAdminTenant() {
+  if (confirm('Apakah Anda ingin keluar dari sesi portal editor pasangan ini?')) {
+    if (tenantSlug) {
+      sessionStorage.removeItem(`pin_verified_${tenantSlug}`);
+    }
+    sessionStorage.clear();
+    window.location.href = 'admin.html';
   }
 }
 

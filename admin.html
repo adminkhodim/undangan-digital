@@ -62,6 +62,10 @@
         <i class="fa-solid fa-floppy-disk"></i>
         <span>Simpan</span>
       </button>
+      <button type="button" id="btn-admin-logout" class="btn btn-outline-secondary" onclick="logoutAdminTenant()" title="Ganti Akun Pasangan / Keluar">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span class="btn-text">Ganti Akun</span>
+      </button>
     </div>
   </header>
 
@@ -826,6 +830,117 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- ====================================================================
+       MODAL AUTHENTICATION: PIN & SLUG LOGIN (GLASSMORPHISM LUXURY)
+       ==================================================================== -->
+  <div id="admin-auth-modal" class="auth-modal-backdrop">
+    <div class="auth-modal-card">
+      <div class="auth-modal-glow"></div>
+
+      <div class="auth-icon-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <!-- Mode 1: Verifikasi PIN Tenant Khusus (?u=slug) -->
+      <div id="auth-mode-pin" class="auth-mode-container">
+        <h2 class="auth-modal-title">Keamanan Portal Editor</h2>
+        <p class="auth-modal-desc">
+          Masukkan PIN Keamanan untuk mengelola undangan pasangan:
+        </p>
+        <div class="auth-tenant-pill" id="auth-tenant-display">
+          <i class="fa-solid fa-heart"></i>
+          <span id="auth-tenant-name">arya-annisa</span>
+        </div>
+
+        <form id="form-verify-pin" onsubmit="handlePinSubmit(event)">
+          <div class="auth-input-group">
+            <label for="auth-input-pin">PIN Keamanan (Minimal 4 Angka)</label>
+            <div class="auth-pin-box">
+              <input type="password" id="auth-input-pin" class="auth-pin-input" placeholder="••••" maxlength="8" inputmode="numeric" autocomplete="current-password" required>
+              <button type="button" class="btn-toggle-pin" onclick="togglePinVisibility('auth-input-pin', this)" title="Lihat/Sembunyikan PIN">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="auth-pin-error" class="auth-alert-error" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="auth-pin-error-text">PIN Keamanan yang Anda masukkan salah.</span>
+          </div>
+
+          <div class="auth-action-buttons">
+            <button type="submit" id="btn-submit-pin" class="btn btn-primary btn-auth-submit">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              <span>Buka Portal Editor</span>
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="switchToLoginMode()">
+              <i class="fa-solid fa-user-group"></i>
+              <span>Ganti Akun Pasangan Lain</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer-help">
+          <a href="https://wa.me/6285385515582?text=Halo%20Admin%20Khodim%20Undangan%2C%20saya%20lupa%20PIN%20admin%20undangan.%20Mohon%20bantuannya." target="_blank" class="auth-link-help" id="auth-wa-help-link">
+            <i class="fa-brands fa-whatsapp"></i> Lupa PIN? Hubungi Admin via WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Mode 2: Login Lengkap (Slug + PIN) saat admin.html dibuka tanpa parameter ?u= -->
+      <div id="auth-mode-login" class="auth-mode-container" style="display: none;">
+        <h2 class="auth-modal-title">Masuk ke Portal Editor</h2>
+        <p class="auth-modal-desc">
+          Kelola isi acara, foto galeri, amplop digital, dan buku tamu undangan pernikahan Anda.
+        </p>
+
+        <form id="form-full-login" onsubmit="handleFullLoginSubmit(event)">
+          <div class="auth-input-group">
+            <label for="auth-input-slug">Tautan Slug Undangan Anda</label>
+            <div class="auth-text-box">
+              <span class="auth-url-prefix">?u=</span>
+              <input type="text" id="auth-input-slug" class="auth-text-input" placeholder="contoh: arya-annisa" required autocomplete="username">
+            </div>
+            <small class="auth-input-hint">Ketikkan kata unik slug yang dibuat saat pendaftaran.</small>
+          </div>
+
+          <div class="auth-input-group">
+            <label for="auth-input-login-pin">PIN Keamanan</label>
+            <div class="auth-pin-box">
+              <input type="password" id="auth-input-login-pin" class="auth-pin-input" placeholder="••••" maxlength="8" inputmode="numeric" autocomplete="current-password" required>
+              <button type="button" class="btn-toggle-pin" onclick="togglePinVisibility('auth-input-login-pin', this)" title="Lihat/Sembunyikan PIN">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="auth-login-error" class="auth-alert-error" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="auth-login-error-text">Slug atau PIN yang Anda masukkan tidak cocok.</span>
+          </div>
+
+          <div class="auth-action-buttons">
+            <button type="submit" id="btn-submit-login" class="btn btn-primary btn-auth-submit">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              <span>Masuk ke Dashboard Saya</span>
+            </button>
+            <button type="button" class="btn btn-outline-primary" onclick="loginAsDemo()">
+              <i class="fa-solid fa-sparkles"></i>
+              <span>Buka Demo (Arya & Annisa)</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer-help">
+          <p>Belum memiliki website undangan digital?</p>
+          <a href="daftar.html" class="auth-link-register">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Buat Undangan Baru Sekarang
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification -->
