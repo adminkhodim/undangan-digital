@@ -139,7 +139,7 @@ function initTabs() {
    2. LOAD CONFIGURATION
    ==================================================================== */
 function loadConfig() {
-  // Ambil dari localStorage atau fallback ke objek WEDDING_CONFIG dari config.js
+  // 1. Ambil dari localStorage atau fallback ke objek WEDDING_CONFIG dari config.js
   const localConfig = localStorage.getItem(STORAGE_CONFIG_KEY);
   if (localConfig) {
     try {
@@ -153,6 +153,23 @@ function loadConfig() {
   }
 
   populateForm(currentConfig);
+
+  // 2. Tarik konfigurasi terbaru dari Google Spreadsheet (Cloud) jika tersedia
+  if (WEDDING_CONFIG.appsScriptUrl) {
+    fetch(WEDDING_CONFIG.appsScriptUrl + '?action=get_config')
+      .then(res => res.json())
+      .then(resJson => {
+        if (resJson && resJson.status === 'success' && resJson.config) {
+          currentConfig = resJson.config;
+          localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(currentConfig));
+          populateForm(currentConfig);
+          console.log('[Admin] Konfigurasi cloud dari Google Sheets berhasil dimuat');
+        }
+      })
+      .catch(err => {
+        console.warn('[Admin] Menggunakan konfigurasi offline/lokal:', err);
+      });
+  }
 }
 
 function populateForm(cfg) {
@@ -637,7 +654,33 @@ function initSaveButton() {
     // 1. Simpan ke LocalStorage agar langsung aktif di browser
     localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(updated));
 
-    // 2. Simpan ke config.js melalui server API
+    const originalBtnHtml = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+    let cloudSaved = false;
+
+    // 2. Simpan ke Google Spreadsheet (Sheet "Pengaturan_Admin") via Google Apps Script
+    if (WEDDING_CONFIG.appsScriptUrl) {
+      try {
+        const gasResponse = await fetch(WEDDING_CONFIG.appsScriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'save_config',
+            config: updated
+          })
+        });
+        const gasJson = await gasResponse.json();
+        if (gasJson && gasJson.status === 'success') {
+          cloudSaved = true;
+          showAdminToast('Pengaturan berhasil disimpan permanen ke Google Sheets!', 'success');
+        }
+      } catch (gasErr) {
+        console.warn('Gagal simpan ke Google Apps Script:', gasErr);
+      }
+    }
+
+    // 3. Simpan ke config.js lokal (jika dijalankan via node server.js di localhost)
     try {
       const response = await fetch('/api/save-config', {
         method: 'POST',
@@ -649,13 +692,15 @@ function initSaveButton() {
 
       const resJson = await response.json();
       if (resJson.success) {
-        showAdminToast('Perubahan berhasil disimpan permanen ke config.js!', 'success');
-      } else {
-        showAdminToast('Tersimpan di browser lokal! (Server save: ' + resJson.error + ')', 'success');
+        showAdminToast('Perubahan berhasil disimpan ke config.js lokal!', 'success');
       }
     } catch (err) {
-      console.warn('Server API tidak tersedia, data disimpan di browser localStorage:', err);
-      showAdminToast('Perubahan berhasil disimpan di peramban Anda!', 'success');
+      if (!cloudSaved) {
+        showAdminToast('Perubahan berhasil disimpan di peramban Anda!', 'success');
+      }
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalBtnHtml;
     }
 
     // Update pratinjau teks whatsapp
@@ -1062,12 +1107,47 @@ function initImageUploaders() {
         return;
       }
 
-      showAdminToast(`Mengunggah "${file.name}"...`, 'success');
+      showAdminToast(`Mengunggah "${file.name}" ke Google Drive...`, 'success');
 
       const reader = new FileReader();
       reader.onload = async (event) => {
         const dataUrl = event.target.result;
 
+        // 1. Coba upload langsung ke Google Drive via Google Apps Script
+        if (WEDDING_CONFIG.appsScriptUrl) {
+          try {
+            const gasRes = await fetch(WEDDING_CONFIG.appsScriptUrl, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'upload_image',
+                filename: file.name,
+                dataUrl: dataUrl
+              })
+            });
+            const gasData = await gasRes.json();
+            if (gasData && gasData.status === 'success' && gasData.fileUrl) {
+              if (targetInputId) {
+                const inputEl = document.getElementById(targetInputId);
+                if (inputEl) {
+                  inputEl.value = gasData.fileUrl;
+                  inputEl.dispatchEvent(new Event('input'));
+                }
+              }
+              if (targetPreviewId) {
+                const prevEl = document.getElementById(targetPreviewId);
+                if (prevEl) prevEl.src = gasData.fileUrl;
+              }
+              showAdminToast('Foto berhasil diunggah ke Google Drive dan diterapkan!', 'success');
+              return;
+            } else {
+              throw new Error(gasData ? gasData.message : 'Gagal upload');
+            }
+          } catch (gasErr) {
+            console.warn('Gagal upload ke Google Apps Script, mencoba server lokal:', gasErr);
+          }
+        }
+
+        // 2. Fallback: Upload ke server lokal jika dijalankan via node server.js
         try {
           const res = await fetch('/api/upload-image', {
             method: 'POST',
@@ -1091,13 +1171,13 @@ function initImageUploaders() {
               const prevEl = document.getElementById(targetPreviewId);
               if (prevEl) prevEl.src = data.filePath;
             }
-            showAdminToast('Foto berhasil diunggah dan diterapkan!', 'success');
+            showAdminToast('Foto berhasil diunggah ke server lokal!', 'success');
           } else {
             showAdminToast('Gagal upload: ' + (data.error || 'Terjadi kesalahan'), 'error');
           }
         } catch (err) {
           console.error('Upload error:', err);
-          showAdminToast('Gagal menghubungi server upload.', 'error');
+          showAdminToast('Gagal mengunggah foto. Pastikan koneksi internet aktif.', 'error');
         }
       };
       reader.readAsDataURL(file);

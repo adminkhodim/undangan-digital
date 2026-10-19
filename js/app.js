@@ -22,6 +22,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Tarik update konfigurasi terbaru dari Google Spreadsheet (Cloud) jika online
+  if (WEDDING_CONFIG.appsScriptUrl) {
+    fetch(WEDDING_CONFIG.appsScriptUrl + '?action=get_config')
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.status === 'success' && res.config) {
+          const cloudConfig = res.config;
+          localStorage.setItem('wedding_custom_config', JSON.stringify(cloudConfig));
+          Object.assign(WEDDING_CONFIG, cloudConfig);
+          if (cloudConfig.couple) {
+            WEDDING_CONFIG.couple = cloudConfig.couple;
+            WEDDING_CONFIG.groom = cloudConfig.couple.groom;
+            WEDDING_CONFIG.bride = cloudConfig.couple.bride;
+            WEDDING_CONFIG.heroPhoto = cloudConfig.couple.heroPhoto;
+          }
+          // Perbarui tampilan dengan data terbaru dari cloud
+          try {
+            initCoupleData();
+            initCountdown();
+            initEvents();
+            initLoveStory();
+            initGallery();
+            initGifts();
+          } catch (err) {}
+        }
+      })
+      .catch(() => {});
+  }
+
   const tasks = [
     { name: 'GuestName', fn: initGuestName },
     { name: 'Cover', fn: initCover },
