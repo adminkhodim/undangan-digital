@@ -518,6 +518,7 @@ function populateForm(cfg) {
   setVal('groom-childOrder', groom.childOrder);
   setVal('groom-fatherName', groom.fatherName);
   setVal('groom-motherName', groom.motherName);
+  setVal('groom-address', groom.address || groom.origin || '');
   setVal('groom-instagramHandle', groom.instagramHandle);
   setVal('groom-bio', groom.bio);
   setVal('groom-photo', groom.photo);
@@ -529,6 +530,7 @@ function populateForm(cfg) {
   setVal('bride-childOrder', bride.childOrder);
   setVal('bride-fatherName', bride.fatherName);
   setVal('bride-motherName', bride.motherName);
+  setVal('bride-address', bride.address || bride.origin || '');
   setVal('bride-instagramHandle', bride.instagramHandle);
   setVal('bride-bio', bride.bio);
   setVal('bride-photo', bride.photo);
@@ -1127,6 +1129,7 @@ function collectAllDataFromDOM() {
     childOrder: getVal('groom-childOrder'),
     fatherName: getVal('groom-fatherName'),
     motherName: getVal('groom-motherName'),
+    address: getVal('groom-address'),
     instagram: 'https://instagram.com/' + getVal('groom-instagramHandle').replace('@', ''),
     instagramHandle: getVal('groom-instagramHandle'),
     photo: getVal('groom-photo'),
@@ -1139,6 +1142,7 @@ function collectAllDataFromDOM() {
     childOrder: getVal('bride-childOrder'),
     fatherName: getVal('bride-fatherName'),
     motherName: getVal('bride-motherName'),
+    address: getVal('bride-address'),
     instagram: 'https://instagram.com/' + getVal('bride-instagramHandle').replace('@', ''),
     instagramHandle: getVal('bride-instagramHandle'),
     photo: getVal('bride-photo'),

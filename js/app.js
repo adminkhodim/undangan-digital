@@ -637,6 +637,15 @@ function initCoupleData() {
   if (transEl && quote.translation) transEl.textContent = `"${quote.translation}"`;
   if (sourceEl && quote.source) sourceEl.textContent = quote.source;
 
+  const formatMotherTitle = (name) => {
+    if (!name) return '';
+    const trimmed = name.trim();
+    if (/^(ibu|hj\.|hajjah|ny\.|dr\.)/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `Ibu ${trimmed}`;
+  };
+
   // Groom
   const groomNameEl = document.getElementById('groom-name');
   if (groomNameEl && groom.fullName) groomNameEl.textContent = groom.fullName;
@@ -644,7 +653,19 @@ function initCoupleData() {
   if (groomOrderEl && groom.childOrder) groomOrderEl.textContent = groom.childOrder;
   const groomParentsEl = document.getElementById('groom-parents');
   if (groomParentsEl && (groom.fatherName || groom.motherName)) {
-    groomParentsEl.textContent = `${groom.fatherName || ''} & Ibu ${groom.motherName || ''}`;
+    const fName = (groom.fatherName || '').trim();
+    const mName = formatMotherTitle(groom.motherName);
+    groomParentsEl.textContent = (fName && mName) ? `${fName} & ${mName}` : (fName || mName);
+  }
+  const groomAddressEl = document.getElementById('groom-address');
+  if (groomAddressEl) {
+    const gAddr = (groom.address || groom.origin || '').trim();
+    if (gAddr) {
+      groomAddressEl.innerHTML = `<i class="fa-solid fa-location-dot text-gold" style="font-size: 0.78rem;"></i> <span>${escapeHtml(gAddr)}</span>`;
+      groomAddressEl.style.display = 'flex';
+    } else {
+      groomAddressEl.style.display = 'none';
+    }
   }
   const groomBioEl = document.getElementById('groom-bio');
   if (groomBioEl && groom.bio) groomBioEl.textContent = groom.bio;
@@ -661,7 +682,19 @@ function initCoupleData() {
   if (brideOrderEl && bride.childOrder) brideOrderEl.textContent = bride.childOrder;
   const brideParentsEl = document.getElementById('bride-parents');
   if (brideParentsEl && (bride.fatherName || bride.motherName)) {
-    brideParentsEl.textContent = `${bride.fatherName || ''} & Ibu ${bride.motherName || ''}`;
+    const fName = (bride.fatherName || '').trim();
+    const mName = formatMotherTitle(bride.motherName);
+    brideParentsEl.textContent = (fName && mName) ? `${fName} & ${mName}` : (fName || mName);
+  }
+  const brideAddressEl = document.getElementById('bride-address');
+  if (brideAddressEl) {
+    const bAddr = (bride.address || bride.origin || '').trim();
+    if (bAddr) {
+      brideAddressEl.innerHTML = `<i class="fa-solid fa-location-dot text-gold" style="font-size: 0.78rem;"></i> <span>${escapeHtml(bAddr)}</span>`;
+      brideAddressEl.style.display = 'flex';
+    } else {
+      brideAddressEl.style.display = 'none';
+    }
   }
   const brideBioEl = document.getElementById('bride-bio');
   if (brideBioEl && bride.bio) brideBioEl.textContent = bride.bio;

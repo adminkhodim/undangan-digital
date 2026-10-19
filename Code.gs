@@ -538,7 +538,8 @@ function saveAllConfigToSheets(ss, cfg) {
     groom.motherName || '',
     groom.instagramHandle || '',
     groom.photo || '',
-    groom.bio || ''
+    groom.bio || '',
+    groom.address || groom.origin || ''
   ]);
 
   sMempelai.appendRow([
@@ -550,14 +551,16 @@ function saveAllConfigToSheets(ss, cfg) {
     bride.motherName || '',
     bride.instagramHandle || '',
     bride.photo || '',
-    bride.bio || ''
+    bride.bio || '',
+    bride.address || bride.origin || ''
   ]);
 
   sMempelai.appendRow([
     'Foto Hero Bersama',
     '-', '-', '-', '-', '-', '-',
     heroPhoto,
-    'Foto Utama / Hero Banner Undangan'
+    'Foto Utama / Hero Banner Undangan',
+    ''
   ]);
 
   // 2. TAB DOA & AYAT
@@ -755,7 +758,8 @@ function readAllConfigFromSheets(ss) {
   // 1. Baca Mempelai
   var sMempelai = ss.getSheetByName('Mempelai');
   if (sMempelai && sMempelai.getLastRow() > 1) {
-    var rowsM = sMempelai.getRange(2, 1, sMempelai.getLastRow() - 1, 9).getValues();
+    var numCols = Math.max(10, sMempelai.getLastColumn());
+    var rowsM = sMempelai.getRange(2, 1, sMempelai.getLastRow() - 1, numCols).getValues();
     rowsM.forEach(function(r) {
       var peran = (r[0] || '').toString().toLowerCase();
       if (peran.indexOf('pria') !== -1) {
@@ -768,7 +772,8 @@ function readAllConfigFromSheets(ss) {
           instagramHandle: r[6] || '',
           instagram: 'https://instagram.com/' + (r[6] || '').toString().replace('@', ''),
           photo: r[7] || '',
-          bio: r[8] || ''
+          bio: r[8] || '',
+          address: r[9] || ''
         };
       } else if (peran.indexOf('wanita') !== -1) {
         result.bride = {
@@ -780,7 +785,8 @@ function readAllConfigFromSheets(ss) {
           instagramHandle: r[6] || '',
           instagram: 'https://instagram.com/' + (r[6] || '').toString().replace('@', ''),
           photo: r[7] || '',
-          bio: r[8] || ''
+          bio: r[8] || '',
+          address: r[9] || ''
         };
       } else if (peran.indexOf('hero') !== -1 || peran.indexOf('bersama') !== -1) {
         result.heroPhoto = r[7] || '';
