@@ -765,17 +765,13 @@ function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
   let navUrl = (rawUrl || '').toString().trim();
   let embedUrl = (rawEmbedUrl || '').toString().trim();
 
-  // Jika navUrl berisi tag <iframe>
+  // 1. Ekstrak src jika navUrl atau embedUrl berisi tag <iframe>
   if (navUrl.includes('<iframe') || navUrl.includes('src=')) {
     const srcMatch = navUrl.match(/src=["']([^"']+)["']/i);
     if (srcMatch && srcMatch[1]) {
       embedUrl = srcMatch[1];
     }
-    const query = [venue, address].filter(Boolean).join(', ');
-    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
   }
-
-  // Jika embedUrl berisi tag <iframe>
   if (embedUrl.includes('<iframe') || embedUrl.includes('src=')) {
     const srcMatch = embedUrl.match(/src=["']([^"']+)["']/i);
     if (srcMatch && srcMatch[1]) {
@@ -783,23 +779,60 @@ function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
     }
   }
 
-  // Jika embedUrl belum ada tapi navUrl adalah url embed
-  if (!embedUrl && navUrl.includes('/maps/embed')) {
-    embedUrl = navUrl;
-    const query = [venue, address].filter(Boolean).join(', ');
-    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  // 2. Deteksi koordinat dari navUrl atau embedUrl
+  // Pola 1: /@-6.79425,110.6150278
+  // Pola 2: !3d-6.79425!4d110.6150278
+  // Pola 3: ?q=-6.79425,110.6150278 atau &query=-6.79425,110.6150278
+  let coords = '';
+  const matchAt = navUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  const matchBang = navUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  const matchQ = navUrl.match(/[?&](?:q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+  if (matchAt) {
+    coords = `${matchAt[1]},${matchAt[2]}`;
+  } else if (matchBang) {
+    coords = `${matchBang[1]},${matchBang[2]}`;
+  } else if (matchQ) {
+    coords = `${matchQ[1]},${matchQ[2]}`;
   }
 
-  // Fallback jika navUrl kosong
-  if (!navUrl) {
-    const query = [venue, address].filter(Boolean).join(', ');
-    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  // 3. Deteksi apakah embedUrl masih memuat data demo default Hotel Mulia Senayan Jakarta
+  const isDemoMuliaEmbed = embedUrl.includes('Hotel%20Mulia') || embedUrl.includes('Hotel+Mulia') || embedUrl.includes('Hotel Mulia') || embedUrl.includes('106.796336');
+  const isActualMulia = (venue && venue.toLowerCase().includes('mulia')) || (address && address.toLowerCase().includes('mulia'));
+
+  if (isDemoMuliaEmbed && !isActualMulia) {
+    embedUrl = ''; // Buang embed default demo yang tertinggal
   }
 
-  // Fallback jika embedUrl kosong
+  // 4. Jika embedUrl bukan URL embed Google Maps yang valid (misal user menempel link biasa ke kolom embed)
+  if (embedUrl && !embedUrl.includes('/maps/embed') && !embedUrl.includes('output=embed')) {
+    const mEmbedCoords = embedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || embedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (mEmbedCoords) {
+      coords = `${mEmbedCoords[1]},${mEmbedCoords[2]}`;
+    }
+    embedUrl = '';
+  }
+
+  // 5. Buat URL Embed dinamis jika embedUrl kosong
   if (!embedUrl) {
-    const query = [venue, address].filter(Boolean).join(', ');
-    embedUrl = query ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
+    if (coords) {
+      embedUrl = `https://maps.google.com/maps?q=${coords}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    } else {
+      const query = [venue, address].filter(Boolean).join(', ');
+      if (query) {
+        embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      }
+    }
+  }
+
+  // 6. Normalisasi navUrl
+  if (!navUrl || navUrl.includes('<iframe')) {
+    if (coords) {
+      navUrl = `https://www.google.com/maps/search/?api=1&query=${coords}`;
+    } else {
+      const query = [venue, address].filter(Boolean).join(', ');
+      navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+    }
   }
 
   return { navUrl, embedUrl };
