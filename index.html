@@ -2,434 +2,533 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Smart Router: Jika ada parameter undangan (?u= atau ?to=), langsung alihkan ke undangan.html tanpa flicker -->
+  <script>
+    (function() {
+      var p = new URLSearchParams(window.location.search);
+      if (p.has('u') || p.has('to')) {
+        window.location.replace('undangan.html' + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
+
   <!-- SEO & Social Media Meta Tags -->
-  <title>The Wedding of Arya & Annisa - Undangan Pernikahan Digital</title>
-  <meta name="description" content="Maha Suci Allah yang telah mempersatukan kami. Kami mengundang Bapak/Ibu/Saudara/i untuk hadir memberikan doa restu pada pernikahan Raden Arya Pratama & Annisa Larasati Putri.">
-  <meta name="keywords" content="undangan digital, wedding invitation, pernikahan arya annisa, undangan online, pernikahan indonesia">
-  <meta name="author" content="Arya & Annisa">
+  <title>Khodim Undangan - Platform Undangan Pernikahan Digital Mewah & Elegan</title>
+  <meta name="description" content="Platform pembuatan website undangan pernikahan digital mewah berbasis Google Workspace. Dilengkapi RSVP Google Sheet real-time, amplop digital tanpa potongan, musik romantis, dan galeri sinematik.">
+  <meta name="keywords" content="undangan digital, wedding invitation digital, undangan pernikahan online, khodim undangan, website pernikahan, rsvp google sheet">
+  <meta name="author" content="Khodim Digital">
+  <link rel="canonical" href="https://undangan.khodim.com/">
 
   <!-- Progressive Web App (PWA) Meta & Icons -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#C5A059">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Arya & Annisa">
-  <link rel="apple-touch-icon" href="assets/images/pwa-icon.svg">
   <link rel="icon" type="image/svg+xml" href="assets/images/pwa-icon.svg">
+  <link rel="apple-touch-icon" href="assets/images/pwa-icon.svg">
 
-  <!-- Open Graph / WhatsApp / Facebook Preview -->
+  <!-- Open Graph / Social Media Preview -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="The Wedding of Arya & Annisa">
-  <meta property="og:description" content="Minggu, 20 Desember 2026 - Bersama memohon ridho dan keberkahan dari Allah SWT.">
+  <meta property="og:title" content="Khodim Undangan - Platform Undangan Pernikahan Digital Mewah">
+  <meta property="og:description" content="Bagikan momen bahagiamu dengan undangan pernikahan digital elegan. Bebas komisi, RSVP otomatis, dan siap dalam hitungan menit.">
   <meta property="og:image" content="assets/images/couple_hero.jpg">
+  <meta property="og:url" content="https://undangan.khodim.com/">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Font Awesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/landing.css">
 </head>
-<body style="overflow: hidden;">
+<body>
 
-  <!-- Background Music Audio Element -->
-  <audio id="wedding-audio" loop preload="auto">
-    <source src="assets/audio/satu_shaf_di_belakangku.mp3" type="audio/mpeg">
-  </audio>
-
-  <!-- ====================================================================
-       1. COVER OVERLAY (HALAMAN PEMBUKA UNDANGAN)
-       ==================================================================== -->
-  <div id="cover-overlay" class="cover-overlay">
-    <div class="cover-container">
-      <div class="cover-top">
-        <span class="cover-badge">The Wedding Invitation</span>
-      </div>
-
-      <div class="cover-center">
-        <div class="cover-title-script">Walimatul 'Urs</div>
-        <h1 class="cover-names">
-          <span id="cover-groom-name">Arya</span>
-          <span class="cover-ampersand">&</span>
-          <span id="cover-bride-name">Annisa</span>
-        </h1>
-        <div id="cover-date-text" class="cover-date">20 . 12 . 2026</div>
-      </div>
-
-      <div class="cover-bottom">
-        <div class="guest-card">
-          <div class="guest-label">Kepada Yth. Bapak/Ibu/Saudara/i:</div>
-          <div class="guest-name guest-name-placeholder">Tamu Undangan</div>
-        </div>
-
-        <button type="button" id="btn-open-invitation" class="btn-open">
-          <i class="fa-solid fa-envelope-open-text"></i>
-          <span>Buka Undangan</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- Background Ambient Glows -->
+  <div class="landing-ambient-glow glow-top-right"></div>
+  <div class="landing-ambient-glow glow-mid-left"></div>
+  <div class="landing-ambient-glow glow-bottom-right"></div>
 
   <!-- ====================================================================
-       FLOATING CONTROLS (MUSIK & NAVIGASI DOCK)
+       1. STICKY NAVBAR
        ==================================================================== -->
-  <!-- Floating Controls (Musik & Auto Scroll) -->
-  <button type="button" id="music-toggle" class="music-toggle-btn" style="display: none;" title="Nyalakan / Matikan Musik" aria-label="Toggle Musik">
-    <i class="fa-solid fa-compact-disc"></i>
-  </button>
-  <button type="button" id="autoscroll-toggle" class="autoscroll-toggle-btn" style="display: none;" title="Auto Scroll (Klik untuk Jeda/Lanjut)" aria-label="Toggle Auto Scroll">
-    <i class="fa-solid fa-angles-down"></i>
-  </button>
-
-  <!-- Floating Bottom Navigation Dock -->
-  <nav id="bottom-dock" class="bottom-dock" aria-label="Navigasi Halaman">
-    <a href="#hero" class="dock-item" aria-label="Cover">
-      <i class="fa-solid fa-house"></i>
-      <span>Home</span>
-    </a>
-    <a href="#couple" class="dock-item" aria-label="Mempelai">
-      <i class="fa-solid fa-heart"></i>
-      <span>Mempelai</span>
-    </a>
-    <a href="#events" class="dock-item" aria-label="Acara">
-      <i class="fa-solid fa-calendar-day"></i>
-      <span>Acara</span>
-    </a>
-    <a href="#story" class="dock-item" aria-label="Cerita">
-      <i class="fa-solid fa-book-open"></i>
-      <span>Cerita</span>
-    </a>
-    <a href="#gallery" class="dock-item" aria-label="Galeri">
-      <i class="fa-solid fa-images"></i>
-      <span>Galeri</span>
-    </a>
-    <a href="#gifts" class="dock-item" aria-label="Hadiah">
-      <i class="fa-solid fa-gift"></i>
-      <span>Kado</span>
-    </a>
-    <a href="#rsvp" class="dock-item" aria-label="Ucapan">
-      <i class="fa-solid fa-comments"></i>
-      <span>Ucapan</span>
-    </a>
-  </nav>
-
-  <!-- ====================================================================
-       MAIN PAGE WRAPPER (MOBILE PRESENTATION)
-       ==================================================================== -->
-  <div class="page-wrapper">
-
-    <!-- HERO SECTION -->
-    <section id="hero" class="hero-section">
-      <div class="hero-content">
-        <div class="hero-subtitle">The Wedding of</div>
-        <h2 id="hero-names" class="hero-title">Arya & Annisa</h2>
-        <div id="hero-date-badge" class="hero-date-badge">Minggu, 20 Desember 2026</div>
-      </div>
-    </section>
-
-    <!-- AYAT & QUOTE SECTION -->
-    <section id="quote" class="quote-section">
-      <div class="quote-card reveal">
-        <div class="text-gold" style="font-size: 1.8rem; margin-bottom: 0.8rem;">
-          <i class="fa-solid fa-dove"></i>
-        </div>
-        <div id="quote-arabic" class="quote-arabic"></div>
-        <p id="quote-translation" class="quote-translation"></p>
-        <div id="quote-source" class="quote-source"></div>
-      </div>
-    </section>
-
-    <!-- MEMPELAI SECTION -->
-    <section id="couple" class="couple-section bg-pattern">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Mempelai</div>
-        <h2 class="section-title">Sang Pengantin</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
-        </div>
-      </div>
-
-      <div class="couple-grid">
-        <!-- Mempelai Pria -->
-        <div class="profile-card reveal">
-          <div class="profile-avatar-frame">
-            <img id="groom-photo" src="assets/images/groom.jpg" alt="Raden Arya Pratama, S.T.">
+  <header class="landing-header">
+    <div class="container">
+      <nav class="landing-nav">
+        <a href="index.html" class="brand-link">
+          <div class="brand-logo-badge">
+            <i class="fa-solid fa-heart"></i>
           </div>
-          <h3 id="groom-name" class="profile-name"></h3>
-          <div id="groom-order" class="profile-order"></div>
-          <div id="groom-parents" class="profile-parents"></div>
-          <p id="groom-bio" class="profile-bio"></p>
-          <a id="groom-ig" href="#" target="_blank" rel="noopener noreferrer" class="profile-social-link">
-            <i class="fa-brands fa-instagram text-gold"></i>
-            <span>@aryapratama</span>
-          </a>
-        </div>
-
-        <div class="couple-ampersand-divider reveal">&</div>
-
-        <!-- Mempelai Wanita -->
-        <div class="profile-card reveal">
-          <div class="profile-avatar-frame">
-            <img id="bride-photo" src="assets/images/bride.jpg" alt="Annisa Larasati Putri, S.E.">
+          <div class="brand-info">
+            <h1>Khodim Undangan</h1>
+            <span>DIGITAL WEDDING PLATFORM</span>
           </div>
-          <h3 id="bride-name" class="profile-name"></h3>
-          <div id="bride-order" class="profile-order"></div>
-          <div id="bride-parents" class="profile-parents"></div>
-          <p id="bride-bio" class="profile-bio"></p>
-          <a id="bride-ig" href="#" target="_blank" rel="noopener noreferrer" class="profile-social-link">
-            <i class="fa-brands fa-instagram text-gold"></i>
-            <span>@annisalrst</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- COUNTDOWN TIMER SECTION -->
-    <section id="countdown" class="countdown-section">
-      <div class="countdown-box reveal">
-        <div class="section-subtitle">Menuju Hari Bahagia</div>
-        <h3 class="font-heading text-gold-gradient" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Hitung Mundur Acara</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted);">Dengan memohon ridho dan rahmat Allah SWT</p>
-
-        <div class="countdown-grid">
-          <div class="countdown-item">
-            <div id="days" class="countdown-number">00</div>
-            <div class="countdown-label">Hari</div>
-          </div>
-          <div class="countdown-item">
-            <div id="hours" class="countdown-number">00</div>
-            <div class="countdown-label">Jam</div>
-          </div>
-          <div class="countdown-item">
-            <div id="minutes" class="countdown-number">00</div>
-            <div class="countdown-label">Menit</div>
-          </div>
-          <div class="countdown-item">
-            <div id="seconds" class="countdown-number">00</div>
-            <div class="countdown-label">Detik</div>
-          </div>
-        </div>
-
-        <a id="btn-add-calendar" href="#" target="_blank" rel="noopener noreferrer" class="btn-calendar">
-          <i class="fa-regular fa-calendar-plus"></i>
-          <span>Simpan ke Google Calendar</span>
         </a>
-      </div>
-    </section>
 
-    <!-- RANGKAIAN ACARA SECTION -->
-    <section id="events" class="events-section bg-pattern">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Waktu & Tempat</div>
-        <h2 class="section-title">Rangkaian Acara</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
+        <ul class="nav-links">
+          <li><a href="#fitur">Fitur Unggulan</a></li>
+          <li><a href="#tema">Koleksi Tema</a></li>
+          <li><a href="#harga">Paket & Harga</a></li>
+          <li><a href="#faq">Tanya Jawab</a></li>
+        </ul>
+
+        <div class="nav-action-buttons">
+          <a href="admin.html" class="btn-nav-admin" title="Masuk ke Portal Pengelolaan Undangan">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk Admin
+          </a>
+          <a href="daftar.html" class="btn-nav-cta">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Buat Undangan
+          </a>
         </div>
-      </div>
+      </nav>
+    </div>
+  </header>
 
-      <div id="events-container" class="events-list">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-    </section>
+  <!-- ====================================================================
+       2. HERO SECTION
+       ==================================================================== -->
+  <section class="hero-section" id="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Hero Text & CTA -->
+        <div class="hero-text-content">
+          <div class="hero-badge-pill">
+            <i class="fa-solid fa-crown"></i> Platform Undangan Pernikahan Digital No. 1
+          </div>
+          <h1 class="hero-title">
+            Undangan Digital Mewah, <span>Eksklusif & Berkesan</span>
+          </h1>
+          <p class="hero-description">
+            Wujudkan kabar bahagiamu dengan website undangan yang memukau. Lengkap dengan alunan musik romantis, RSVP otomatis ke Google Sheet, dan amplop digital langsung ke rekeningmu tanpa potongan komisi sepeser pun.
+          </p>
 
-    <!-- LOVE STORY TIMELINE SECTION -->
-    <section id="story" class="story-section">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Kisah Kami</div>
-        <h2 class="section-title">Perjalanan Cinta</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
-        </div>
-      </div>
-
-      <div id="timeline-container" class="timeline">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-    </section>
-
-    <!-- GALERI FOTO SECTION -->
-    <section id="gallery" class="gallery-section bg-pattern">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Momen Bahagia</div>
-        <h2 class="section-title">Galeri Prewedding</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
-        </div>
-      </div>
-
-      <div id="gallery-grid" class="gallery-grid">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-    </section>
-
-    <!-- WEDDING GIFT / AMPLOP DIGITAL SECTION -->
-    <section id="gifts" class="gifts-section">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Tanda Kasih</div>
-        <h2 class="section-title">Amplop Digital</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
-        </div>
-      </div>
-
-      <p class="gift-intro reveal">
-        Doa restu Anda adalah karunia yang paling berharga bagi kami. Namun jika Anda bermaksud memberikan tanda kasih, Anda dapat menyalurkannya melalui rekening di bawah ini:
-      </p>
-
-      <!-- Wadah Kartu QRIS -->
-      <div id="qris-card-container">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-
-      <div id="bank-accounts-container" class="gift-cards-container">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-
-      <div id="physical-gift-container">
-        <!-- Rendered dynamically from config.js -->
-      </div>
-    </section>
-
-    <!-- RSVP & BUKU UCAPAN SECTION -->
-    <section id="rsvp" class="rsvp-section bg-pattern">
-      <div class="section-header reveal">
-        <div class="section-subtitle">Buku Tamu</div>
-        <h2 class="section-title">RSVP & Doa Restu</h2>
-        <div class="section-divider">
-          <i class="fa-solid fa-diamond section-divider-icon"></i>
-        </div>
-      </div>
-
-      <!-- Form RSVP -->
-      <div class="rsvp-card reveal">
-        <form id="rsvp-form">
-          <div class="form-group">
-            <label for="rsvp-name" class="form-label">Nama Lengkap</label>
-            <input type="text" id="rsvp-name" class="form-control" placeholder="Contoh: Bpk. Dimas & Keluarga" required>
+          <div class="hero-cta-group">
+            <a href="daftar.html" class="btn-hero-primary">
+              <i class="fa-solid fa-sparkles"></i> Mulai Buat Undangan
+            </a>
+            <a href="undangan.html?to=Tamu+Undangan" target="_blank" class="btn-hero-secondary">
+              <i class="fa-solid fa-eye"></i> Lihat Contoh Undangan
+            </a>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Konfirmasi Kehadiran</label>
-            <div class="radio-group">
-              <div class="radio-card">
-                <input type="radio" id="att-hadir" name="attendance" value="hadir" checked>
-                <label for="att-hadir">
-                  <i class="fa-solid fa-circle-check text-gold" style="margin-bottom: 4px;"></i>
-                  <span>Hadir</span>
-                </label>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <h3>10.000+</h3>
+              <p>Tamu Terlayani</p>
+            </div>
+            <div class="stat-item">
+              <h3>100%</h3>
+              <p>Bebas Potongan Amplop</p>
+            </div>
+            <div class="stat-item">
+              <h3>3 Menit</h3>
+              <p>Siap Dibagikan</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Phone Mockup Showcase -->
+        <div class="hero-mockup-wrapper">
+          <div class="mockup-glow"></div>
+
+          <!-- Floating Badges -->
+          <div class="floating-badge badge-top-left">
+            <i class="fa-solid fa-bell"></i>
+            <span>RSVP Masuk Real-time!</span>
+          </div>
+          <div class="floating-badge badge-bottom-right">
+            <i class="fa-solid fa-gift"></i>
+            <span>Amplop 100% Milikmu</span>
+          </div>
+
+          <div class="phone-mockup">
+            <div class="phone-notch-bar"></div>
+            <div class="phone-screen-content">
+              <div class="phone-screen-overlay"></div>
+              
+              <div class="screen-card-box">
+                <div class="tag">The Wedding of</div>
+                <div class="names">Arya & Annisa</div>
+                <div class="date">Minggu, 20 Desember 2026</div>
               </div>
-              <div class="radio-card">
-                <input type="radio" id="att-ragu" name="attendance" value="ragu">
-                <label for="att-ragu">
-                  <i class="fa-solid fa-circle-question text-gold" style="margin-bottom: 4px;"></i>
-                  <span>Ragu-ragu</span>
-                </label>
-              </div>
-              <div class="radio-card">
-                <input type="radio" id="att-tidak" name="attendance" value="tidak-hadir">
-                <label for="att-tidak">
-                  <i class="fa-solid fa-circle-xmark text-gold" style="margin-bottom: 4px;"></i>
-                  <span>Tidak Hadir</span>
-                </label>
+
+              <div class="screen-demo-cta">
+                <a href="undangan.html?to=Tamu+Undangan" target="_blank" class="btn-screen-demo">
+                  <i class="fa-solid fa-envelope-open-text"></i> Buka Contoh Undangan
+                </a>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-          <div class="form-group">
-            <label for="rsvp-message" class="form-label">Ucapan & Doa Restu</label>
-            <textarea id="rsvp-message" class="form-control" placeholder="Tuliskan ucapan dan doa hangat untuk kedua mempelai..." required></textarea>
+  <!-- ====================================================================
+       3. FEATURES SHOWCASE
+       ==================================================================== -->
+  <section class="features-section" id="fitur">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">FITUR LENGKAP & MODERN</span>
+        <h2 class="section-title">Semua yang Kamu Butuhkan dalam <span>Satu Tautan</span></h2>
+        <p class="section-subtitle">Dirancang khusus untuk menghadirkan pengalaman terbaik bagi calon pengantin dan kemudahan akses bagi tamu undangan di semua perangkat.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Fitur 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-envelope-open-text"></i>
           </div>
+          <h3>RSVP & Buku Tamu Real-time</h3>
+          <p>Konfirmasi kehadiran dan ucapan doa dari tamu tersimpan otomatis di Google Sheet pribadimu secara real-time.</p>
+        </div>
 
-          <button type="submit" class="btn-submit-rsvp">
-            <i class="fa-solid fa-paper-plane"></i>
-            <span>Kirim Konfirmasi & Doa</span>
-          </button>
-        </form>
-      </div>
+        <!-- Fitur 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <h3>Amplop Digital & QRIS</h3>
+          <p>Terima kado pernikahan transfer bank atau scan QRIS langsung ke rekening mempelai 100% tanpa potongan komisi.</p>
+        </div>
 
-      <!-- Daftar Ucapan -->
-      <div class="reveal">
-        <h4 style="font-family: var(--font-heading); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
-          <span>Doa Restu Tamu Undangan</span>
-          <span id="wishes-count" class="text-gold" style="font-size: 0.9rem;"></span>
-        </h4>
-        <div id="wishes-container" class="wishes-container">
-          <!-- Rendered dynamically -->
+        <!-- Fitur 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <h3>Navigasi Google Maps</h3>
+          <p>Pandu tamu langsung menuju lokasi akad dan resepsi dengan akurasi tinggi hanya dengan satu ketukan tombol.</p>
+        </div>
+
+        <!-- Fitur 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-images"></i>
+          </div>
+          <h3>Galeri Foto Sinematik</h3>
+          <p>Tampilkan foto-foto prewedding terbaik dalam galeri visual interaktif dengan tata letak modern dan elegan.</p>
+        </div>
+
+        <!-- Fitur 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <h3>Countdown & Pengingat</h3>
+          <p>Fitur hitung mundur interaktif dan tombol Add to Google Calendar agar tamu tidak melewatkan hari bahagiamu.</p>
+        </div>
+
+        <!-- Fitur 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <h3>Tamu Tanpa Batas (Unlimited)</h3>
+          <p>Bagikan undangan ke ratusan hingga ribuan tamu dengan nama khusus masing-masing tanpa biaya tambahan.</p>
+        </div>
+
+        <!-- Fitur 7 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-compact-disc"></i>
+          </div>
+          <h3>Musik Latar Romantis</h3>
+          <p>Undangan dilengkapi pemutar musik latar syahdu dengan tombol kontrol audio mengambang yang ramah pengguna.</p>
+        </div>
+
+        <!-- Fitur 8 -->
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <h3>Portal Admin Interaktif</h3>
+          <p>Kelola dan perbarui jadwal, lokasi, doa, nomor rekening, dan galeri foto kapan saja lewat dashboard mandiri.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- CLOSING SECTION -->
-    <section id="closing" class="closing-section">
-      <div class="reveal">
-        <p class="closing-text">
-          Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu kepada kedua mempelai.
-        </p>
+  <!-- ====================================================================
+       4. THEMES CATALOG SHOWCASE
+       ==================================================================== -->
+  <section class="themes-section" id="tema">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">PILIHAN TEMA MEWAH</span>
+        <h2 class="section-title">Desain Elegan yang <span>Memikat Hati</span></h2>
+        <p class="section-subtitle">Setiap tema dirancang eksklusif dengan tipografi berkelas, animasi lembut, dan palet warna harmonis.</p>
+      </div>
 
-        <div class="closing-script">Terima Kasih</div>
-        <div class="closing-names">Arya & Annisa</div>
+      <div class="themes-grid">
+        <!-- Tema 1 -->
+        <div class="theme-card">
+          <div class="theme-thumbnail-wrap">
+            <img src="assets/images/couple_hero.jpg" alt="Tema Royal Champagne">
+            <span class="theme-badge-overlay">Terpopuler</span>
+          </div>
+          <div class="theme-card-body">
+            <h3>Royal Champagne & Gold</h3>
+            <p>Sentuhan kemewahan klasik dengan aksen emas berpadu latar champagne hangat yang sangat agung.</p>
+            <a href="undangan.html?theme=champagne&to=Tamu+Undangan" target="_blank" class="btn-theme-preview" data-theme="champagne">
+              <i class="fa-solid fa-eye"></i> Lihat Demo Tema
+            </a>
+          </div>
+        </div>
 
-        <div class="closing-family">
-          Keluarga Besar Bpk. Bambang Hermanto & Bpk. Suryono
+        <!-- Tema 2 -->
+        <div class="theme-card">
+          <div class="theme-thumbnail-wrap">
+            <img src="assets/images/bride.jpg" alt="Tema Minimalist Sand & White">
+            <span class="theme-badge-overlay">Intimate Wedding</span>
+          </div>
+          <div class="theme-card-body">
+            <h3>Minimalist Sand & White</h3>
+            <p>Estetika modern yang bersih, anggun, dan menonjolkan keintiman momen suci pernikahanmu.</p>
+            <a href="undangan.html?theme=sand&to=Tamu+Undangan" target="_blank" class="btn-theme-preview" data-theme="sand">
+              <i class="fa-solid fa-eye"></i> Lihat Demo Tema
+            </a>
+          </div>
+        </div>
+
+        <!-- Tema 3 -->
+        <div class="theme-card">
+          <div class="theme-thumbnail-wrap">
+            <img src="assets/images/groom.jpg" alt="Tema Emerald Botanical Gold">
+            <span class="theme-badge-overlay">Klasik Romantis</span>
+          </div>
+          <div class="theme-card-body">
+            <h3>Emerald Botanical Gold</h3>
+            <p>Nuansa kesegaran alam yang berpadu dengan bingkai floral keemasan yang menyejukkan mata.</p>
+            <a href="undangan.html?theme=emerald&to=Tamu+Undangan" target="_blank" class="btn-theme-preview" data-theme="emerald">
+              <i class="fa-solid fa-eye"></i> Lihat Demo Tema
+            </a>
+          </div>
         </div>
       </div>
-    </section>
-
-  </div> <!-- End .page-wrapper -->
-
-  <!-- ====================================================================
-       LIGHTBOX MODAL FOR GALLERY
-       ==================================================================== -->
-  <div id="lightbox-modal" class="lightbox-modal">
-    <div class="lightbox-content">
-      <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Tutup Galeri">&times;</button>
-      <img id="lightbox-img" src="" alt="Galeri Preview">
-      <div id="lightbox-caption" class="lightbox-caption"></div>
     </div>
-  </div>
+  </section>
 
   <!-- ====================================================================
-       QRIS MODAL POPUP
+       5. PRICING SECTION
        ==================================================================== -->
-  <div id="qris-modal" class="qris-modal">
-    <div class="qris-modal-content">
-      <button type="button" id="qris-modal-close" class="qris-modal-close" onclick="closeQrisModal()" aria-label="Tutup QRIS">&times;</button>
-      <div class="qris-modal-title">Amplop Digital QRIS</div>
-      <div id="qris-modal-merchant" class="qris-modal-merchant">Raden Arya &amp; Annisa</div>
-      <div class="qris-img-wrapper">
-        <img id="qris-img-tag" src="assets/images/qris.svg" alt="QRIS Standar Pembayaran Nasional">
+  <section class="pricing-section" id="harga">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">HARGA TRANSPARAN & TERJANGKAU</span>
+        <h2 class="section-title">Investasi Terbaik untuk <span>Hari Spesialmu</span></h2>
+        <p class="section-subtitle">Sekali bayar, tanpa biaya langganan bulanan. Pilih paket yang paling pas untuk hari bahagia kalian.</p>
       </div>
-      <a id="btn-download-qris" href="assets/images/qris.svg" download="QRIS_Arya_Annisa.svg" class="btn-download-qris">
-        <i class="fa-solid fa-download"></i>
-        <span>Unduh Gambar QRIS</span>
-      </a>
+
+      <div class="pricing-grid">
+        <!-- Paket Silver -->
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Paket Silver</h3>
+            <p>Pilihan praktis untuk acara sederhana</p>
+          </div>
+          <div class="pricing-price">
+            <span class="price-currency">Rp</span>
+            <span class="price-amount">49</span>
+            <span class="price-period">.000 / selamanya</span>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> Kirim Tamu Tanpa Batas</li>
+            <li><i class="fa-solid fa-circle-check"></i> RSVP & Buku Tamu Google Sheet</li>
+            <li><i class="fa-solid fa-circle-check"></i> Navigasi Google Maps Presisi</li>
+            <li><i class="fa-solid fa-circle-check"></i> Amplop Digital (1 No. Rekening)</li>
+            <li><i class="fa-solid fa-circle-check"></i> Hitung Mundur Hari H</li>
+            <li><i class="fa-solid fa-circle-check"></i> Galeri Foto (Maksimal 5 Foto)</li>
+            <li><i class="fa-solid fa-circle-check"></i> Masa Aktif 3 Bulan</li>
+          </ul>
+          <a href="daftar.html?plan=silver" class="btn-pricing btn-pricing-secondary">
+            Pilih Paket Silver
+          </a>
+        </div>
+
+        <!-- Paket Gold (Terpopuler) -->
+        <div class="pricing-card popular">
+          <div class="pricing-popular-tag">TERPOPULER & REKOMENDASI</div>
+          <div class="pricing-header">
+            <h3>Paket Gold</h3>
+            <p>Paket terlengkap untuk pernikahan istimewa</p>
+          </div>
+          <div class="pricing-price">
+            <span class="price-currency">Rp</span>
+            <span class="price-amount">99</span>
+            <span class="price-period">.000 / selamanya</span>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> <strong>Semua Fitur Paket Silver</strong></li>
+            <li><i class="fa-solid fa-circle-check"></i> <strong>Masa Aktif SELAMANYA (Lifetime)</strong></li>
+            <li><i class="fa-solid fa-circle-check"></i> Galeri Foto Tanpa Batas (Unlimited)</li>
+            <li><i class="fa-solid fa-circle-check"></i> Kustom Musik Latar Favorit</li>
+            <li><i class="fa-solid fa-circle-check"></i> Kisah Perjalanan Cinta (Love Story)</li>
+            <li><i class="fa-solid fa-circle-check"></i> Multi Rekening Bank + QRIS</li>
+            <li><i class="fa-solid fa-circle-check"></i> Generator Teks WhatsApp Otomatis</li>
+            <li><i class="fa-solid fa-circle-check"></i> Dashboard Portal Admin Mandiri</li>
+          </ul>
+          <a href="daftar.html?plan=gold" class="btn-pricing btn-pricing-primary">
+            Pilih Paket Gold
+          </a>
+        </div>
+
+        <!-- Paket VIP Platinum -->
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Paket VIP Platinum</h3>
+            <p>Terima beres, tim kami yang inputkan data</p>
+          </div>
+          <div class="pricing-price">
+            <span class="price-currency">Rp</span>
+            <span class="price-amount">149</span>
+            <span class="price-period">.000 / selamanya</span>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> <strong>Semua Fitur Paket Gold</strong></li>
+            <li><i class="fa-solid fa-circle-check"></i> <strong>Layanan Input Data oleh Tim (Terima Beres)</strong></li>
+            <li><i class="fa-solid fa-circle-check"></i> Revisi Data & Foto Sepuasnya</li>
+            <li><i class="fa-solid fa-circle-check"></i> Desain QRIS Kustom dengan Nama Pengantin</li>
+            <li><i class="fa-solid fa-circle-check"></i> Prioritas Bantuan WhatsApp 24/7</li>
+            <li><i class="fa-solid fa-circle-check"></i> Panduan Sebar Undangan Kilat</li>
+          </ul>
+          <a href="daftar.html?plan=vip" class="btn-pricing btn-pricing-secondary">
+            Pilih Paket VIP
+          </a>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Scripts -->
-  <script src="config.js"></script>
-  <script src="js/app.js"></script>
+  <!-- ====================================================================
+       6. FAQ ACCORDION SECTION
+       ==================================================================== -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">TANYA JAWAB</span>
+        <h2 class="section-title">Pertanyaan yang Sering <span>Diajukan</span></h2>
+        <p class="section-subtitle">Temukan jawaban cepat seputar pembuatan dan pengelolaan undangan pernikahan digital di platform kami.</p>
+      </div>
 
-  <!-- PWA Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => {
-            console.log('[PWA] Service Worker aktif:', reg.scope);
-          })
-          .catch(err => {
-            console.warn('[PWA] Service Worker gagal didaftarkan:', err);
-          });
-      });
-    }
-  </script>
+      <div class="faq-list">
+        <!-- Item 1 -->
+        <div class="faq-item active">
+          <div class="faq-question">
+            <h4>Berapa lama proses pembuatan undangan?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Hanya butuh 3 menit! Cukup isi nama calon mempelai, pilih tema, dan URL undangan digitalmu langsung aktif seketika dan siap dibagikan ke para tamu.
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="faq-item">
+          <div class="faq-question">
+            <h4>Apakah jumlah tamu undangan yang diundang dibatasi?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Sama sekali tidak dibatasi (Unlimited Guests). Kamu dapat mengirimkan undangan ke ratusan hingga ribuan keluarga dan sahabat tercinta tanpa dipungut biaya tambahan.
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="faq-item">
+          <div class="faq-question">
+            <h4>Apakah uang amplop digital dipotong komisi oleh pihak platform?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            100% Bebas Potongan! Dana dari para tamu akan ditransfer langsung ke rekening bank atau dompet digital milik kalian berdua tanpa perantara atau potongan sepeser pun.
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="faq-item">
+          <div class="faq-question">
+            <h4>Bagaimana jika ada perubahan tanggal atau lokasi acara di kemudian hari?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Tenang, kamu dapat mengubah data jadwal acara, alamat peta, maupun foto galeri kapan saja lewat Portal Admin Mandiri. Perubahan akan langsung terupdate saat itu juga.
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="faq-item">
+          <div class="faq-question">
+            <h4>Apakah saya bisa menggunakan lagu musik pilihan saya sendiri?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Bisa banget! Pada paket Gold dan VIP, kamu bebas memilih dan mengunggah lagu favorit yang paling mewakili kisah cinta kalian berdua.
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="faq-item">
+          <div class="faq-question">
+            <h4>Bagaimana jika saya gaptek atau butuh bantuan dalam mengisi data?</h4>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Jangan khawatir! Tim customer support kami selalu siap membantumu via WhatsApp. Kamu juga bisa memilih Paket VIP Platinum untuk layanan "Terima Beres", di mana seluruh data akan diinputkan oleh tim profesional kami.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       7. BOTTOM CALL TO ACTION
+       ==================================================================== -->
+  <section class="cta-banner-section">
+    <div class="container">
+      <div class="cta-banner-card">
+        <h2>Siap Menyebarkan Kebahagiaan <span>Pernikahanmu?</span></h2>
+        <p>Bergabunglah dengan ribuan pasangan yang telah mempercayakan undangan pernikahan digital mereka bersama Khodim Undangan. Praktis, elegan, dan siap dalam 3 menit.</p>
+        <a href="daftar.html" class="btn-hero-primary">
+          <i class="fa-solid fa-heart"></i> Daftar & Buat Undangan Sekarang
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       8. FOOTER
+       ==================================================================== -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div class="footer-brand">
+          <h4>Khodim Undangan Digital</h4>
+          <p>© 2026 Khodim Undangan. Wujudkan momen pernikahan istimewa bersama kami.</p>
+        </div>
+        <ul class="footer-links">
+          <li><a href="#fitur">Fitur</a></li>
+          <li><a href="#tema">Tema</a></li>
+          <li><a href="#harga">Harga</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="admin.html">Portal Admin</a></li>
+          <li><a href="undangan.html?to=Tamu+Undangan" target="_blank">Demo Undangan</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp Consultation Button -->
+  <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Khodim%20Undangan%2C%20saya%20ingin%20konsultasi%20pembuatan%20undangan%20digital" target="_blank" class="floating-wa-btn" title="Konsultasi Gratis via WhatsApp" aria-label="Konsultasi WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- Landing Page Script -->
+  <script src="js/landing.js"></script>
 </body>
 </html>

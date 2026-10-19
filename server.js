@@ -157,7 +157,10 @@ if (typeof WEDDING_CONFIG.couple !== 'undefined') {
     pathname = '/index.html';
   }
 
-  const filePath = path.join(BASE_DIR, pathname);
+  let filePath = path.join(BASE_DIR, pathname);
+  if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.html')) {
+    filePath = filePath + '.html';
+  }
 
   // Security check: cegah path traversal
   if (!filePath.startsWith(BASE_DIR)) {

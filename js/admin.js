@@ -39,8 +39,8 @@ function initTenantHeader() {
 
   // Sesuaikan link pratinjau agar membuka undangan pasangan yang bersangkutan
   const previewLink = document.querySelector('a.btn-secondary[title*="Pratinjau"]');
-  if (previewLink && tenantSlug) {
-    previewLink.href = `index.html?u=${encodeURIComponent(tenantSlug)}`;
+  if (previewLink) {
+    previewLink.href = tenantSlug ? `undangan.html?u=${encodeURIComponent(tenantSlug)}` : 'undangan.html';
   }
 }
 
@@ -61,7 +61,7 @@ function checkTenantPinProtection(onVerified) {
   const userPin = prompt(`Portal Admin Pasangan [${tenantSlug}]:\nMasukkan 6-digit PIN Keamanan Anda untuk mengelola undangan:`);
   if (!userPin) {
     alert('Akses dibatalkan. Anda akan dialihkan ke halaman utama.');
-    window.location.href = `index.html?u=${encodeURIComponent(tenantSlug)}`;
+    window.location.href = `undangan.html?u=${encodeURIComponent(tenantSlug)}`;
     return;
   }
 

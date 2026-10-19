@@ -167,6 +167,11 @@ function initRegistrationSubmit() {
       ? WEDDING_CONFIG.appsScriptUrl 
       : 'https://script.google.com/macros/s/AKfycbylw1T_Lv0lxniv9-KowxxcGcYGQyb3WLTj30UQQMTsf7dvb460vFn50NY0TdFo2Tes/exec';
 
+    const urlPlan = new URLSearchParams(window.location.search).get('plan');
+    let planName = 'Paket Gold (Terpopuler)';
+    if (urlPlan === 'silver') planName = 'Paket Silver';
+    else if (urlPlan === 'vip') planName = 'Paket VIP Platinum';
+
     const payload = {
       action: 'register_user',
       namaPria: groom,
@@ -177,7 +182,7 @@ function initRegistrationSubmit() {
       email: email,
       pin: pin,
       weddingDate: date,
-      paket: 'VIP Digital Gold'
+      paket: planName
     };
 
     try {
