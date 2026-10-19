@@ -182,7 +182,8 @@ function initRegistrationSubmit() {
       email: email,
       pin: pin,
       weddingDate: date,
-      paket: planName
+      paket: planName,
+      theme: new URLSearchParams(window.location.search).get('theme') || 'champagne'
     };
 
     try {

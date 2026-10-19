@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const tenantSlug = urlParams.get('u') || urlParams.get('slug') || '';
   const tenantStorageKey = tenantSlug ? `wedding_custom_config_${tenantSlug}` : 'wedding_custom_config';
 
+  // 0b. Deteksi & Terapkan Tema Undangan
+  initThemeSwitcher(urlParams);
+
   // Sinkronisasi Custom Config dari LocalStorage jika ada
   const customConfigStr = localStorage.getItem(tenantStorageKey);
   if (customConfigStr) {
@@ -21,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
         WEDDING_CONFIG.groom = parsedConfig.couple.groom;
         WEDDING_CONFIG.bride = parsedConfig.couple.bride;
         WEDDING_CONFIG.heroPhoto = parsedConfig.couple.heroPhoto;
+      }
+      if (parsedConfig.theme && !urlParams.get('theme')) {
+        applyTheme(parsedConfig.theme);
       }
     } catch (e) {
       console.warn('Gagal parse custom config dari localStorage:', e);
@@ -42,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
             WEDDING_CONFIG.groom = cloudConfig.couple.groom;
             WEDDING_CONFIG.bride = cloudConfig.couple.bride;
             WEDDING_CONFIG.heroPhoto = cloudConfig.couple.heroPhoto;
+          }
+          if (cloudConfig.theme && !urlParams.get('theme')) {
+            applyTheme(cloudConfig.theme);
           }
 
           // Perbarui judul tab browser sesuai nama pasangan
@@ -87,6 +96,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+/* ====================================================================
+   0. MANAJEMEN TEMA UNDANGAN (MULTI-THEME SWITCHER)
+   ==================================================================== */
+function initThemeSwitcher(urlParams) {
+  const queryTheme = urlParams ? (urlParams.get('theme') || '') : '';
+  const activeTheme = queryTheme || (typeof WEDDING_CONFIG !== 'undefined' && WEDDING_CONFIG.theme) || 'champagne';
+  
+  applyTheme(activeTheme);
+
+  // Jika URL memiliki parameter ?demo= atau ?theme=, tampilkan floating preview selector
+  if (urlParams && (urlParams.has('theme') || urlParams.has('demo'))) {
+    renderThemePreviewPill(activeTheme);
+  }
+}
+
+window.applyTheme = function(themeName) {
+  const validThemes = ['champagne', 'sand', 'emerald'];
+  const theme = validThemes.includes(themeName) ? themeName : 'champagne';
+  
+  document.body.classList.remove('theme-champagne', 'theme-sand', 'theme-emerald');
+  document.body.setAttribute('data-theme', theme);
+  document.body.classList.add(`theme-${theme}`);
+  
+  // Update tombol active pada preview pill jika ada
+  document.querySelectorAll('.theme-pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
+  });
+
+  // Update theme-color browser
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    if (theme === 'sand') metaThemeColor.setAttribute('content', '#9E8062');
+    else if (theme === 'emerald') metaThemeColor.setAttribute('content', '#20604A');
+    else metaThemeColor.setAttribute('content', '#C5A059');
+  }
+};
+
+function renderThemePreviewPill(currentTheme) {
+  if (document.getElementById('theme-preview-pill')) return;
+
+  const pill = document.createElement('div');
+  pill.id = 'theme-preview-pill';
+  pill.className = 'theme-preview-pill';
+  pill.innerHTML = `
+    <div class="theme-pill-label">
+      <i class="fa-solid fa-palette"></i> Tema:
+    </div>
+    <div class="theme-pill-options">
+      <button type="button" class="theme-pill-btn ${currentTheme === 'champagne' ? 'active' : ''}" data-theme="champagne" onclick="applyTheme('champagne')">Champagne</button>
+      <button type="button" class="theme-pill-btn ${currentTheme === 'sand' ? 'active' : ''}" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+      <button type="button" class="theme-pill-btn ${currentTheme === 'emerald' ? 'active' : ''}" data-theme="emerald" onclick="applyTheme('emerald')">Emerald</button>
+    </div>
+  `;
+  document.body.appendChild(pill);
+}
 
 /* ====================================================================
    1. EKSTRAKSI NAMA TAMU DARI URL PARAMETER (?to=Nama+Tamu)

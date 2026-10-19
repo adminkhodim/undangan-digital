@@ -40,6 +40,198 @@
   --max-width: 480px; /* Optimal mobile layout wrapper for wedding invitations */
 }
 
+/* ====================================================================
+   MULTI-THEME STYLING SYSTEM
+   Themes: Champagne Gold (Default), Sand & White, Emerald Botanical Gold
+   ==================================================================== */
+
+/* Theme 1: Champagne Gold (Default) */
+[data-theme="champagne"],
+body.theme-champagne {
+  --gold-primary: #C5A059;
+  --gold-light: #E7D7B5;
+  --gold-dark: #8E6D2F;
+  --gold-metallic: linear-gradient(135deg, #F3E7C4 0%, #C5A059 50%, #9B7836 100%);
+  --gold-shine: linear-gradient(90deg, #C5A059, #F7E8C8, #C5A059);
+  
+  --bg-cream: #FAF7F2;
+  --bg-sand: #F3ECE1;
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.88);
+  
+  --text-dark: #22201D;
+  --text-body: #55504A;
+  --text-muted: #8C857B;
+  
+  --border-gold: rgba(197, 160, 89, 0.35);
+  --border-subtle: rgba(197, 160, 89, 0.15);
+  
+  --shadow-sm: 0 4px 12px rgba(42, 36, 25, 0.04);
+  --shadow-md: 0 10px 30px rgba(197, 160, 89, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 40px rgba(197, 160, 89, 0.18), 0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+/* Theme 2: Minimalist Sand & White */
+[data-theme="sand"],
+body.theme-sand {
+  --gold-primary: #9E8062;
+  --gold-light: #E6DDD4;
+  --gold-dark: #6D553D;
+  --gold-metallic: linear-gradient(135deg, #F3EDE7 0%, #A88B6E 50%, #765D46 100%);
+  --gold-shine: linear-gradient(90deg, #9E8062, #EFE9E3, #9E8062);
+  
+  --bg-cream: #FBF9F6;
+  --bg-sand: #F0EAE1;
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.94);
+  
+  --text-dark: #262320;
+  --text-body: #554F49;
+  --text-muted: #8A827B;
+  
+  --border-gold: rgba(158, 128, 98, 0.35);
+  --border-subtle: rgba(158, 128, 98, 0.16);
+  
+  --shadow-sm: 0 4px 12px rgba(38, 35, 32, 0.04);
+  --shadow-md: 0 10px 30px rgba(158, 128, 98, 0.12), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 40px rgba(158, 128, 98, 0.18), 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+body.theme-sand .page-wrapper {
+  background-color: var(--bg-cream);
+}
+body.theme-sand .btn-open {
+  box-shadow: 0 8px 25px rgba(158, 128, 98, 0.4);
+}
+body.theme-sand .quote-card,
+body.theme-sand .profile-card,
+body.theme-sand .event-card,
+body.theme-sand .timeline-card,
+body.theme-sand .gift-card,
+body.theme-sand .rsvp-card,
+body.theme-sand .wish-card {
+  border-color: rgba(158, 128, 98, 0.22);
+}
+
+/* Theme 3: Emerald Botanical Gold */
+[data-theme="emerald"],
+body.theme-emerald {
+  --gold-primary: #20604A;
+  --gold-light: #CCE5DB;
+  --gold-dark: #123C2E;
+  --gold-metallic: linear-gradient(135deg, #E6F3EE 0%, #20604A 55%, #123C2E 100%);
+  --gold-shine: linear-gradient(90deg, #20604A, #D4AF37, #20604A);
+  
+  --bg-cream: #F4F8F6;
+  --bg-sand: #EAF2EE;
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.92);
+  
+  --text-dark: #12241D;
+  --text-body: #384E45;
+  --text-muted: #688077;
+  
+  --border-gold: rgba(32, 96, 74, 0.35);
+  --border-subtle: rgba(32, 96, 74, 0.16);
+  
+  --shadow-sm: 0 4px 12px rgba(18, 60, 46, 0.05);
+  --shadow-md: 0 10px 30px rgba(32, 96, 74, 0.14), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 40px rgba(32, 96, 74, 0.20), 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+body.theme-emerald .page-wrapper {
+  background-color: var(--bg-cream);
+}
+body.theme-emerald .cover-title-script,
+body.theme-emerald .cover-ampersand {
+  color: #E2F2EB;
+}
+body.theme-emerald .section-divider-icon {
+  color: #D4AF37; /* Sentuhan emas pada ornamen botani */
+}
+body.theme-emerald .btn-open {
+  color: #FFFFFF;
+  box-shadow: 0 8px 25px rgba(32, 96, 74, 0.45);
+}
+body.theme-emerald .btn-open:hover {
+  box-shadow: 0 12px 30px rgba(32, 96, 74, 0.65);
+}
+body.theme-emerald .music-toggle-btn {
+  color: #FFFFFF;
+}
+body.theme-emerald .autoscroll-toggle-btn.scrolling {
+  color: #FFFFFF;
+}
+body.theme-emerald .quote-card,
+body.theme-emerald .profile-card,
+body.theme-emerald .event-card,
+body.theme-emerald .timeline-card,
+body.theme-emerald .gift-card,
+body.theme-emerald .rsvp-card,
+body.theme-emerald .wish-card {
+  border-color: rgba(32, 96, 74, 0.24);
+}
+
+/* Floating Theme Switcher Badge (Untuk Mode Preview / Demo) */
+.theme-preview-pill {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(23, 21, 19, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  font-size: 0.76rem;
+  color: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.theme-pill-label {
+  color: #E7D7B5;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.theme-pill-options {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme-pill-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #CFCAC2;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-pill-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-pill-btn.active {
+  background: var(--gold-metallic);
+  color: #22201D;
+  font-weight: 700;
+  border-color: transparent;
+}
+
 /* Reset & Box Sizing */
 *, *::before, *::after {
   box-sizing: border-box;

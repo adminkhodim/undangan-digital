@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPreviewListeners();
   initImageUploaders();
   initAutoScrollAdminControls();
+  initThemeAdminControls();
 });
 
 /* ====================================================================
@@ -342,6 +343,14 @@ function populateForm(cfg) {
   if (speedSlider) {
     speedSlider.dispatchEvent(new Event('input'));
   }
+
+  // 11. Tema Undangan
+  const currentTheme = cfg.theme || 'champagne';
+  const themeRadios = document.querySelectorAll('input[name="admin-theme"]');
+  themeRadios.forEach(radio => {
+    radio.checked = (radio.value === currentTheme);
+  });
+  updateThemeCardUI(currentTheme);
 
   // Update generator tamu dengan nama mempelai
   updateGuestSharePreview();
@@ -846,7 +855,11 @@ function collectAllDataFromDOM() {
   const autoScrollSpeed = parseFloat(getVal('autoscroll-speed-input') || getVal('autoscroll-speed-slider')) || 2.8;
   const autoScrollAutoStart = document.getElementById('autoscroll-autostart')?.checked ?? true;
 
+  const selectedThemeRadio = document.querySelector('input[name="admin-theme"]:checked');
+  const theme = selectedThemeRadio ? selectedThemeRadio.value : 'champagne';
+
   return {
+    theme,
     couple: {
       groom,
       bride,
@@ -1340,3 +1353,45 @@ function initAutoScrollAdminControls() {
     });
   });
 }
+
+/* ====================================================================
+   10. KONTROL PEMILIHAN TEMA DI PORTAL ADMIN
+   ==================================================================== */
+function initThemeAdminControls() {
+  const cards = document.querySelectorAll('.theme-select-card');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio) {
+        radio.checked = true;
+        updateThemeCardUI(radio.value);
+      }
+    });
+  });
+}
+
+function updateThemeCardUI(selectedTheme) {
+  const themes = ['champagne', 'sand', 'emerald'];
+  themes.forEach(t => {
+    const card = document.getElementById(`theme-card-${t}`);
+    if (card) {
+      if (t === selectedTheme) {
+        card.style.borderColor = 'var(--primary)';
+        card.style.boxShadow = '0 6px 20px rgba(197, 160, 89, 0.25)';
+        card.style.background = '#FFFFFF';
+      } else {
+        card.style.borderColor = 'var(--border-color)';
+        card.style.boxShadow = 'none';
+        card.style.background = '#FAF7F2';
+      }
+    }
+  });
+
+  // Perbarui tombol pratinjau agar langsung memuat tema yang dipilih
+  const previewLink = document.querySelector('a.btn-secondary[title*="Pratinjau"]');
+  if (previewLink) {
+    const baseHref = tenantSlug ? `undangan.html?u=${encodeURIComponent(tenantSlug)}` : 'undangan.html';
+    previewLink.href = `${baseHref}${baseHref.includes('?') ? '&' : '?'}theme=${encodeURIComponent(selectedTheme)}`;
+  }
+}
+

@@ -676,6 +676,7 @@ function saveAllConfigToSheets(ss, cfg) {
     ['music_audioFile', music.audioFile || 'assets/audio/satu_shaf_di_belakangku.mp3', 'URL atau file musik MP3 latar'],
     ['music_title', music.title || 'Satu Shaf Di Belakangku - Arvian Dwi', 'Judul musik yang berputar'],
     ['gift_introText', gifts.introText || '', 'Teks pengantar di section Amplop Digital'],
+    ['theme', cfg.theme || 'champagne', 'Tema palet warna undangan (champagne, sand, emerald)'],
     ['slug_undangan', CONFIG.DEFAULT_SLUG, 'Identifier unik pasangan (SaaS Ready)'],
     ['terakhir_diperbarui', Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss'), 'Timestamp perubahan terakhir']
   ];
@@ -718,7 +719,8 @@ function readAllConfigFromSheets(ss) {
       fallbackSynthesizer: true
     },
     autoScrollSpeed: 2.8,
-    autoScrollAutoStart: true
+    autoScrollAutoStart: true,
+    theme: 'champagne'
   };
 
   // 1. Baca Mempelai
@@ -862,6 +864,7 @@ function readAllConfigFromSheets(ss) {
       if (key === 'music_audioFile' && val) result.music.audioFile = val;
       if (key === 'music_title' && val) result.music.title = val;
       if (key === 'gift_introText' && val) result.gifts.introText = val;
+      if (key === 'theme' && val) result.theme = val;
     });
   }
 

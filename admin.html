@@ -143,9 +143,9 @@
           <span>Amplop & Kado</span>
           <span class="tab-index-badge">6</span>
         </button>
-        <button type="button" class="nav-tab-btn" data-tab="tab-musik" data-category="Pengaturan Konten" data-title="Musik & Auto Scroll" data-icon="fa-music" data-step="7 / 9">
-          <i class="fa-solid fa-music"></i>
-          <span>Musik & Auto Scroll</span>
+        <button type="button" class="nav-tab-btn" data-tab="tab-musik" data-category="Pengaturan Konten" data-title="Tema & Musik" data-icon="fa-palette" data-step="7 / 9">
+          <i class="fa-solid fa-palette"></i>
+          <span>Tema & Musik</span>
           <span class="tab-index-badge">7</span>
         </button>
 
@@ -554,9 +554,45 @@
       </section>
 
       <!-- ==============================================================
-           TAB 7: MUSIK LATAR
+           TAB 7: TEMA & MUSIK LATAR
            ============================================================== -->
       <section id="tab-musik" class="tab-pane">
+        <!-- PENGATURAN TEMA DESAIN UNDANGAN -->
+        <div class="admin-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title"><i class="fa-solid fa-palette"></i> Pilihan Tema Desain Undangan</h2>
+              <p class="card-desc">Pilih tema palet warna eksklusif yang sesuai dengan konsep pernikahan Anda</p>
+            </div>
+          </div>
+          
+          <div class="theme-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 10px;">
+            <!-- Tema 1 -->
+            <label class="theme-select-card" id="theme-card-champagne" style="border: 2px solid var(--primary); border-radius: 12px; padding: 14px; cursor: pointer; display: block; transition: all 0.2s ease; background: #FFF;">
+              <input type="radio" name="admin-theme" value="champagne" style="display: none;" checked>
+              <div style="height: 60px; border-radius: 8px; background: linear-gradient(135deg, #FAF7F2 0%, #E7D7B5 50%, #C5A059 100%); margin-bottom: 10px; border: 1px solid rgba(197,160,89,0.3);"></div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: #222;">Royal Champagne</div>
+              <div style="font-size: 0.8rem; color: #777; margin-top: 2px;">Kemewahan klasik emas & champagne hangat (Default)</div>
+            </label>
+
+            <!-- Tema 2 -->
+            <label class="theme-select-card" id="theme-card-sand" style="border: 2px solid var(--border-color); border-radius: 12px; padding: 14px; cursor: pointer; display: block; transition: all 0.2s ease; background: #FFF;">
+              <input type="radio" name="admin-theme" value="sand" style="display: none;">
+              <div style="height: 60px; border-radius: 8px; background: linear-gradient(135deg, #FBF9F6 0%, #E6DDD4 50%, #9E8062 100%); margin-bottom: 10px; border: 1px solid rgba(158,128,98,0.3);"></div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: #222;">Minimalist Sand & White</div>
+              <div style="font-size: 0.8rem; color: #777; margin-top: 2px;">Estetika modern linen & earth-toned taupe yang bersih</div>
+            </label>
+
+            <!-- Tema 3 -->
+            <label class="theme-select-card" id="theme-card-emerald" style="border: 2px solid var(--border-color); border-radius: 12px; padding: 14px; cursor: pointer; display: block; transition: all 0.2s ease; background: #FFF;">
+              <input type="radio" name="admin-theme" value="emerald" style="display: none;">
+              <div style="height: 60px; border-radius: 8px; background: linear-gradient(135deg, #F4F8F6 0%, #CCE5DB 50%, #20604A 100%); margin-bottom: 10px; border: 1px solid rgba(32,96,74,0.3);"></div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: #222;">Emerald Botanical Gold</div>
+              <div style="font-size: 0.8rem; color: #777; margin-top: 2px;">Nuansa botanical hijau emerald kerajaan & sentuhan emas</div>
+            </label>
+          </div>
+        </div>
+
         <div class="admin-card">
           <div class="card-header">
             <div>
