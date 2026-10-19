@@ -646,6 +646,23 @@ function initCoupleData() {
     return `Ibu ${trimmed}`;
   };
 
+  const formatFatherTitle = (name) => {
+    if (!name) return '';
+    let trimmed = name.trim();
+    if (!trimmed) return '';
+    trimmed = trimmed.replace(/^keluarga\s+besar\s+/i, '');
+    if (/^(alm\.|almarhum)\s*/i.test(trimmed)) {
+      if (!/^(alm\.|almarhum)\s*(bpk|bapak)\b/i.test(trimmed)) {
+        return trimmed.replace(/^(alm\.|almarhum)\s*/i, 'Alm. Bpk. ');
+      }
+      return trimmed;
+    }
+    if (/^(bpk\.|bpk\b|bapak\b)/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `Bpk. ${trimmed}`;
+  };
+
   // Groom
   const groomNameEl = document.getElementById('groom-name');
   if (groomNameEl && groom.fullName) groomNameEl.textContent = groom.fullName;
@@ -751,8 +768,28 @@ function initCoupleData() {
   const heroNames = document.getElementById('hero-names');
   if (heroNames) heroNames.textContent = `${groomShort} & ${brideShort}`;
 
-  const closingNames = document.querySelector('.closing-names');
+  const closingNames = document.getElementById('closing-names') || document.querySelector('.closing-names');
   if (closingNames) closingNames.textContent = `${groomShort} & ${brideShort}`;
+
+  // Update Teks Keluarga Besar pada Bagian Penutup (Closing)
+  const closingFamily = document.getElementById('closing-family') || document.querySelector('.closing-family');
+  if (closingFamily) {
+    const customClosingFamily = (WEDDING_CONFIG.closingFamily || (WEDDING_CONFIG.couple && WEDDING_CONFIG.couple.closingFamily) || '').trim();
+    if (customClosingFamily) {
+      closingFamily.textContent = customClosingFamily;
+    } else {
+      const gFather = (groom.fatherName || '').trim();
+      const bFather = (bride.fatherName || '').trim();
+      const gTitle = gFather ? formatFatherTitle(gFather) : (groom.motherName ? formatMotherTitle(groom.motherName) : '');
+      const bTitle = bFather ? formatFatherTitle(bFather) : (bride.motherName ? formatMotherTitle(bride.motherName) : '');
+
+      if (gTitle && bTitle) {
+        closingFamily.textContent = `Keluarga Besar ${gTitle} & ${bTitle}`;
+      } else if (gTitle || bTitle) {
+        closingFamily.textContent = `Keluarga Besar ${gTitle || bTitle}`;
+      }
+    }
+  }
 
   // Format Tanggal Cover & Hero
   formatInvitationDate();

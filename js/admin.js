@@ -536,9 +536,10 @@ function populateForm(cfg) {
   setVal('bride-photo', bride.photo);
   setImgSrc('preview-bride-photo', bride.photo);
 
-  // 3. Foto Hero Utama
+  // 3. Foto Hero Utama & Penutup
   setVal('heroPhoto', heroPhoto);
   setImgSrc('preview-hero-photo', heroPhoto);
+  setVal('closingFamily', cfg.closingFamily || (cfg.couple && cfg.couple.closingFamily) || '');
 
   // 4. Doa & Ayat
   const quote = cfg.quote || {};
@@ -1150,6 +1151,7 @@ function collectAllDataFromDOM() {
   };
 
   const heroPhoto = getVal('heroPhoto');
+  const closingFamily = getVal('closingFamily');
 
   const quote = {
     arabic: getVal('quote-arabic'),
@@ -1199,8 +1201,10 @@ function collectAllDataFromDOM() {
     couple: {
       groom,
       bride,
-      heroPhoto
+      heroPhoto,
+      closingFamily
     },
+    closingFamily,
     groom,
     bride,
     heroPhoto,

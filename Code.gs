@@ -570,6 +570,17 @@ function saveAllConfigToSheets(ss, cfg) {
     ''
   ]);
 
+  var closingFamily = (cfg.closingFamily || (cfg.couple && cfg.couple.closingFamily) || '').toString().trim();
+  if (closingFamily) {
+    sMempelai.appendRow([
+      'Keluarga Besar Penutup',
+      closingFamily,
+      '-', '-', '-', '-', '-', '-',
+      'Teks khusus penutup undangan',
+      ''
+    ]);
+  }
+
   // 2. TAB DOA & AYAT
   var sDoa = getOrCreateSheet(ss, 'Doa_Ayat', [
     'Tipe', 'Teks Kaligrafi Arab', 'Terjemahan Bahasa Indonesia', 'Sumber / Nama Surat'
@@ -797,11 +808,14 @@ function readAllConfigFromSheets(ss) {
         };
       } else if (peran.indexOf('hero') !== -1 || peran.indexOf('bersama') !== -1) {
         result.heroPhoto = r[7] || '';
+      } else if (peran.indexOf('keluarga') !== -1 || peran.indexOf('penutup') !== -1) {
+        result.closingFamily = r[1] || '';
       }
     });
     result.couple.groom = result.groom;
     result.couple.bride = result.bride;
     result.couple.heroPhoto = result.heroPhoto;
+    result.couple.closingFamily = result.closingFamily || '';
   }
 
   // 2. Baca Doa & Ayat
