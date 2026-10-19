@@ -42,11 +42,21 @@ function doGet(e) {
       });
     }
 
-    if (action === 'init_tabs') {
+    if (action === 'init_tabs' || action === 'rapikan_sheet') {
       initAllTabs(ss);
       return createJsonResponse({
         status: 'success',
-        message: 'Semua tab berhasil diinisialisasi dengan rapi!'
+        message: 'Semua tab (termasuk Data_Pengguna & Buku_Tamu_RSVP) berhasil diinisialisasi dan dirapikan!'
+      });
+    }
+
+    if (action === 'check_slug') {
+      var checkSlug = (e && e.parameter && e.parameter.slug) ? e.parameter.slug.toLowerCase().trim() : '';
+      var isAvailable = isSlugAvailable(ss, checkSlug);
+      return createJsonResponse({
+        status: 'success',
+        slug: checkSlug,
+        available: isAvailable
       });
     }
 
@@ -132,6 +142,62 @@ function doPost(e) {
       });
     }
 
+    // 4. DAFTAR PENGGUNA BARU (SAAS REGISTRATION)
+    if (action === 'register_user') {
+      var sUsers = getOrCreateSheet(ss, 'Data_Pengguna', [
+        'ID_User', 'Tanggal_Daftar', 'Nama_Pasangan', 'Slug_Undangan', 
+        'Email', 'No_WhatsApp', 'PIN_Admin', 'Paket', 'Status', 'Spreadsheet_ID', 'Drive_Folder_ID'
+      ]);
+
+      var slug = (postData.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '').trim();
+      if (!slug) throw new Error('Tautan slug undangan wajib diisi.');
+
+      if (!isSlugAvailable(ss, slug)) {
+        return createJsonResponse({
+          status: 'error',
+          message: 'Tautan slug "' + slug + '" sudah digunakan oleh pasangan lain. Silakan pilih slug lain.'
+        });
+      }
+
+      var namaPria = postData.namaPria || 'Groom';
+      var namaWanita = postData.namaWanita || 'Bride';
+      var namaPasangan = postData.namaPasangan || (namaPria + ' & ' + namaWanita);
+      var email = postData.email || '';
+      var whatsapp = postData.whatsapp || '';
+      var pin = postData.pin || '123456';
+      var paket = postData.paket || 'Starter Free';
+      var statusUser = 'Aktif';
+
+      var newUserId = 'USR-' + Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyMM') + '-' + Math.floor(100 + Math.random() * 900);
+      var regDate = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss');
+
+      sUsers.appendRow([
+        newUserId,
+        regDate,
+        namaPasangan,
+        slug,
+        email,
+        whatsapp,
+        pin,
+        paket,
+        statusUser,
+        ss.getId(),
+        CONFIG.DRIVE_FOLDER_ID
+      ]);
+
+      return createJsonResponse({
+        status: 'success',
+        message: 'Pendaftaran undangan digital berhasil! Selamat datang, ' + namaPasangan + '.',
+        user: {
+          id: newUserId,
+          namaPasangan: namaPasangan,
+          slug: slug,
+          adminUrl: 'admin.html?u=' + slug,
+          guestUrl: 'index.html?u=' + slug
+        }
+      });
+    }
+
     return createJsonResponse({
       status: 'error',
       message: 'Aksi tidak dikenali: ' + action
@@ -148,8 +214,68 @@ function doPost(e) {
 /* ====================================================================
    1. AUTO-PROVISIONING & INISIALISASI TAB
    ==================================================================== */
+function rapikanSheet1(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet1 = ss.getSheetByName('Sheet1');
+  var rsvpSheet = ss.getSheetByName('Buku_Tamu_RSVP');
+
+  if (sheet1) {
+    if (!rsvpSheet) {
+      // Jika Buku_Tamu_RSVP belum ada, ubah nama Sheet1 menjadi Buku_Tamu_RSVP
+      sheet1.setName('Buku_Tamu_RSVP');
+      formatHeaderRow(sheet1, Math.max(sheet1.getLastColumn(), 5));
+    } else {
+      // Jika Buku_Tamu_RSVP sudah ada, salin data dari Sheet1 jika ada
+      var s1LastRow = sheet1.getLastRow();
+      if (s1LastRow > 1) {
+        var s1Data = sheet1.getRange(2, 1, s1LastRow - 1, sheet1.getLastColumn()).getValues();
+        s1Data.forEach(function(row) {
+          var waktu = row[0] || Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss');
+          var nama = row[1] || '';
+          var hadir = row[2] || 'hadir';
+          var ucapan = row[3] || '';
+          rsvpSheet.appendRow([waktu, nama, hadir, 1, ucapan]);
+        });
+      }
+      try {
+        ss.deleteSheet(sheet1);
+      } catch (delErr) {}
+    }
+  }
+
+  var targetRsvp = ss.getSheetByName('Buku_Tamu_RSVP');
+  if (targetRsvp) {
+    formatHeaderRow(targetRsvp, Math.max(targetRsvp.getLastColumn(), 5));
+  }
+}
+
 function initAllTabs(ss) {
   if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 1. Rapikan Sheet1 menjadi Buku_Tamu_RSVP
+  rapikanSheet1(ss);
+
+  // 2. Tab Data_Pengguna (Master Tenants SaaS)
+  var sUsers = getOrCreateSheet(ss, 'Data_Pengguna', [
+    'ID_User', 'Tanggal_Daftar', 'Nama_Pasangan', 'Slug_Undangan', 
+    'Email', 'No_WhatsApp', 'PIN_Admin', 'Paket', 'Status', 'Spreadsheet_ID', 'Drive_Folder_ID'
+  ]);
+  if (sUsers.getLastRow() <= 1) {
+    var nowStr = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss');
+    sUsers.appendRow([
+      'USR-001',
+      nowStr,
+      'Raden Arya & Annisa Larasati',
+      'arya-annisa',
+      'admin@undangan.id',
+      '081234567890',
+      '123456',
+      'Premium Master',
+      'Aktif',
+      ss.getId(),
+      CONFIG.DRIVE_FOLDER_ID
+    ]);
+  }
 
   // Tab 1: Mempelai
   getOrCreateSheet(ss, 'Mempelai', [
@@ -697,6 +823,31 @@ function createJsonResponse(data) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+function isSlugAvailable(ss, slug) {
+  if (!slug) return false;
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sUsers = ss.getSheetByName('Data_Pengguna');
+  if (!sUsers || sUsers.getLastRow() <= 1) return true;
+
+  var slugs = sUsers.getRange(2, 4, sUsers.getLastRow() - 1, 1).getValues();
+  for (var i = 0; i < slugs.length; i++) {
+    if ((slugs[i][0] || '').toString().toLowerCase().trim() === slug.toLowerCase().trim()) {
+      return false; // Sudah terpakai
+    }
+  }
+  return true;
+}
+
+/**
+ * Fungsi manual untuk merapikan Sheet1 langsung dari editor toolbar
+ */
+function jalankanPerapihanSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  rapikanSheet1(ss);
+  initAllTabs(ss);
+  Logger.log('Perapihan tab sheet berhasil diselesaikan!');
+}
+
 function formatRelativeTime(date) {
   try {
     var now = new Date();
@@ -714,3 +865,5 @@ function formatRelativeTime(date) {
     return 'Baru saja';
   }
 }
+
+
