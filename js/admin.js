@@ -1140,10 +1140,22 @@ function initImageUploaders() {
               showAdminToast('Foto berhasil diunggah ke Google Drive dan diterapkan!', 'success');
               return;
             } else {
-              throw new Error(gasData ? gasData.message : 'Gagal upload');
+              const gasMsg = gasData && gasData.message ? gasData.message : 'Gagal memproses upload';
+              console.warn('Gagal upload ke Google Apps Script:', gasMsg);
+              // Jika di hosting cloud (bukan localhost), tampilkan langsung pesan error dari Apps Script
+              const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+              if (!isLocalhost) {
+                showAdminToast(`Gagal: ${gasMsg}`, 'error');
+                return;
+              }
             }
           } catch (gasErr) {
-            console.warn('Gagal upload ke Google Apps Script, mencoba server lokal:', gasErr);
+            console.warn('Gagal menghubungi Google Apps Script, mencoba server lokal:', gasErr);
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (!isLocalhost) {
+              showAdminToast('Gagal menghubungi Google Apps Script. Periksa koneksi internet.', 'error');
+              return;
+            }
           }
         }
 
@@ -1177,7 +1189,7 @@ function initImageUploaders() {
           }
         } catch (err) {
           console.error('Upload error:', err);
-          showAdminToast('Gagal mengunggah foto. Pastikan koneksi internet aktif.', 'error');
+          showAdminToast('Gagal mengunggah foto. Pastikan server lokal berjalan atau koneksi internet aktif.', 'error');
         }
       };
       reader.readAsDataURL(file);
