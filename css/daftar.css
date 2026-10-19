@@ -739,138 +739,8 @@ body {
   border-left-color: #E63946;
 }
 
-/* Responsive Mobile & Tablet Optimizations */
-@media (max-width: 900px) {
-  .saas-grid {
-    grid-template-columns: 1fr;
-  }
-  .register-card {
-    order: 1; /* Form pendaftaran tampil pertama agar pengguna langsung dapat mengisi */
-  }
-  .preview-panel {
-    order: 2;
-    position: static;
-    margin-top: 24px;
-  }
-  .saas-hero-header h2 {
-    font-size: 1.8rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .saas-navbar {
-    padding: 14px 16px;
-  }
-  .brand-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 1.1rem;
-    border-radius: 10px;
-  }
-  .brand-text h1 {
-    font-size: 1.05rem;
-  }
-  .brand-text span {
-    display: none; /* Sembunyikan sub-teks di layar kecil */
-  }
-  .btn-login-admin {
-    padding: 8px 14px;
-    font-size: 0.82rem;
-  }
-
-  .saas-container {
-    padding: 10px 16px 40px;
-  }
-  .saas-hero-header {
-    margin-bottom: 24px;
-  }
-  .saas-hero-header .hero-pill {
-    font-size: 0.72rem;
-    padding: 4px 12px;
-  }
-  .saas-hero-header h2 {
-    font-size: 1.55rem;
-    line-height: 1.25;
-  }
-  .saas-hero-header p {
-    font-size: 0.88rem;
-  }
-
-  .form-group-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .register-card {
-    padding: 22px 16px;
-    border-radius: 18px;
-  }
-  .form-step-title {
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .step-number {
-    width: 28px;
-    height: 28px;
-    font-size: 0.85rem;
-  }
-  .step-text h3 {
-    font-size: 1.02rem;
-  }
-  .step-text p {
-    font-size: 0.78rem;
-  }
-  .form-input {
-    padding: 12px 14px 12px 42px;
-    font-size: 0.92rem;
-  }
-  .btn-submit-register {
-    padding: 14px 18px;
-    font-size: 0.92rem;
-  }
-
-  .preview-card-wrap {
-    padding: 20px 16px;
-  }
-  .phone-mockup-frame {
-    max-width: 260px;
-    border-width: 6px;
-    border-radius: 28px;
-    padding: 10px;
-  }
-  .phone-screen {
-    padding: 22px 12px;
-    border-radius: 20px;
-  }
-
-  .success-modal-card {
-    padding: 26px 18px;
-    width: calc(100% - 28px);
-    max-width: 420px;
-    border-radius: 20px;
-  }
-  .success-modal-card h3 {
-    font-size: 1.35rem;
-  }
-  .modal-action-buttons {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .btn-primary-action,
-  .btn-secondary-action {
-    padding: 13px 18px;
-    font-size: 0.92rem;
-  }
-  .plan-selection-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .plan-option-card {
-    padding: 14px 12px;
-  }
-}
-
 /* ====================================================================
-   FASE 2: PLAN SELECTOR & CHECKOUT WHATSAPP STYLING
+   FASE 2: PLAN SELECTOR & CHECKOUT WHATSAPP BASE STYLING
    ==================================================================== */
 .plan-selection-grid {
   display: grid;
@@ -924,7 +794,7 @@ body {
 .plan-badge {
   font-size: 0.65rem;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   background: rgba(197, 160, 89, 0.15);
   color: var(--gold-dark);
   font-weight: 700;
@@ -1008,7 +878,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
+  padding: 6px 0;
   font-size: 0.82rem;
   border-bottom: 1px dashed rgba(197, 160, 89, 0.15);
 }
@@ -1021,8 +891,8 @@ body {
   background: rgba(197, 160, 89, 0.2);
   border: none;
   border-radius: 4px;
-  padding: 2px 7px;
-  font-size: 0.7rem;
+  padding: 3px 8px;
+  font-size: 0.72rem;
   color: var(--gold-dark);
   cursor: pointer;
   margin-left: 6px;
@@ -1045,7 +915,7 @@ body {
   padding: 13px 20px;
   background: #25D366;
   color: #FFFFFF;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   text-decoration: none;
   font-weight: 700;
   font-size: 0.95rem;
@@ -1057,5 +927,236 @@ body {
   background: #1EBE5D;
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(37, 211, 102, 0.45);
+}
+
+/* ====================================================================
+   RESPONSIVE DESIGN (TABLET & MOBILE)
+   ==================================================================== */
+@media (max-width: 900px) {
+  .saas-grid {
+    grid-template-columns: 1fr;
+  }
+  .register-card {
+    order: 1; /* Form pendaftaran tampil pertama agar pengguna langsung dapat mengisi */
+  }
+  .preview-panel {
+    order: 2;
+    position: static;
+    margin-top: 24px;
+  }
+  .saas-hero-header h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .saas-navbar {
+    padding: 14px 16px;
+  }
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+  .brand-text h1 {
+    font-size: 1.05rem;
+  }
+  .brand-text span {
+    display: none; /* Sembunyikan sub-teks di layar kecil */
+  }
+  .btn-login-admin {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .saas-container {
+    padding: 10px 16px 40px;
+  }
+  .saas-hero-header {
+    margin-bottom: 24px;
+  }
+  .saas-hero-header .hero-pill {
+    font-size: 0.72rem;
+    padding: 4px 12px;
+  }
+  .saas-hero-header h2 {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+  .saas-hero-header p {
+    font-size: 0.88rem;
+  }
+
+  .form-group-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .register-card {
+    padding: 22px 16px;
+    border-radius: 18px;
+  }
+  .form-step-title {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  .step-text h3 {
+    font-size: 1.02rem;
+  }
+  .step-text p {
+    font-size: 0.78rem;
+  }
+  .form-input {
+    padding: 12px 14px 12px 42px;
+    font-size: 0.92rem;
+  }
+
+  /* Plan Selection Cards di Mobile: Stack Vertikal Rapi 1 Kolom */
+  .plan-selection-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .plan-option-card {
+    padding: 14px 14px;
+  }
+  .plan-name {
+    font-size: 1rem;
+  }
+  .plan-price {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+  .plan-desc {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  /* Submit Button Responsif di Mobile */
+  .btn-submit-register {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: normal;
+    text-align: center;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .btn-submit-register i {
+    flex-shrink: 0;
+  }
+
+  .preview-card-wrap {
+    padding: 20px 16px;
+  }
+  .phone-mockup-frame {
+    max-width: 260px;
+    border-width: 6px;
+    border-radius: 28px;
+    padding: 10px;
+  }
+  .phone-screen {
+    padding: 22px 12px;
+    border-radius: 20px;
+  }
+
+  /* Modal Berhasil & Checkout Responsif di Layar Ponsel */
+  .success-modal-backdrop {
+    padding: 14px;
+    align-items: center;
+  }
+  .success-modal-card {
+    padding: 24px 16px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 20px;
+  }
+  .success-icon-wrap {
+    width: 58px;
+    height: 58px;
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+  }
+  .success-modal-card h3 {
+    font-size: 1.35rem;
+  }
+  .success-modal-card p {
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+  }
+  .checkout-summary-box {
+    padding: 14px 12px;
+    margin-bottom: 18px;
+  }
+  .checkout-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .checkout-amount {
+    font-size: 1.25rem;
+  }
+  .bank-row {
+    font-size: 0.78rem;
+    padding: 6px 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .btn-mini-copy {
+    padding: 3px 6px;
+    font-size: 0.68rem;
+  }
+  .btn-whatsapp-confirm {
+    padding: 12px 16px;
+    font-size: 0.88rem;
+  }
+  .modal-action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn-primary-action,
+  .btn-secondary-action {
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    width: 100%;
+  }
+}
+
+/* Extra Small Phones (<= 380px) */
+@media (max-width: 380px) {
+  .saas-navbar {
+    padding: 12px;
+  }
+  .brand-text h1 {
+    font-size: 0.95rem;
+  }
+  .saas-container {
+    padding: 6px 12px 30px;
+  }
+  .register-card {
+    padding: 18px 12px;
+  }
+  .form-input {
+    padding: 11px 12px 11px 36px;
+    font-size: 0.86rem;
+  }
+  .plan-name {
+    font-size: 0.95rem;
+  }
+  .plan-price {
+    font-size: 1.05rem;
+  }
+  .btn-submit-register {
+    font-size: 0.84rem;
+    padding: 12px 12px;
+  }
 }
 

@@ -14,7 +14,7 @@ const SAAS_PLANS = {
   },
   gold: {
     key: 'gold',
-    name: 'Paket Gold (Terpopuler)',
+    name: 'Paket Gold',
     price: 99000,
     priceFormatted: 'Rp 99.000',
     duration: 'Selamanya (Lifetime)'
@@ -73,7 +73,7 @@ function updatePlanUI(planKey) {
   // Update teks tombol submit
   const btnLabel = document.getElementById('btn-submit-label');
   if (btnLabel) {
-    btnLabel.textContent = `✨ Terbitkan Undangan Saya Sekarang [${plan.name} - ${plan.priceFormatted}]`;
+    btnLabel.textContent = `✨ Terbitkan Undangan (${plan.name} • ${plan.priceFormatted})`;
   }
 }
 

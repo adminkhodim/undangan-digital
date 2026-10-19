@@ -1005,6 +1005,12 @@ body {
 /* ====================================================================
    RESPONSIVE DESIGN (MOBILE & TABLET OPTIMIZATIONS)
    ==================================================================== */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
 @media (max-width: 1024px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -1033,50 +1039,69 @@ body {
 }
 
 @media (max-width: 768px) {
+  .landing-ambient-glow {
+    width: 260px;
+    height: 260px;
+    filter: blur(60px);
+    opacity: 0.35;
+  }
+  .glow-top-right {
+    top: -80px;
+    right: -30px;
+  }
+  .glow-mid-left {
+    top: 600px;
+    left: -40px;
+  }
+  .glow-bottom-right {
+    bottom: 100px;
+    right: -30px;
+  }
+
   .nav-links {
     display: none;
   }
   .landing-nav {
-    height: 68px;
+    height: 66px;
   }
   .brand-logo-badge {
-    width: 38px;
-    height: 38px;
-    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    font-size: 1.05rem;
     border-radius: 10px;
   }
   .brand-info h1 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
   .brand-info span {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.5px;
   }
   .btn-nav-admin {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+    padding: 7px 12px;
+    font-size: 0.78rem;
   }
   .btn-nav-cta {
     padding: 8px 14px;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     gap: 6px;
   }
   .hero-section {
-    padding: 40px 0 60px;
+    padding: 36px 0 55px;
   }
   .hero-title {
-    font-size: clamp(1.9rem, 6vw, 2.4rem);
+    font-size: clamp(1.85rem, 5.5vw, 2.3rem);
     line-height: 1.2;
   }
   .hero-description {
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     line-height: 1.6;
   }
   .features-grid {
     grid-template-columns: 1fr;
   }
   .section-title {
-    font-size: clamp(1.6rem, 5vw, 1.95rem);
+    font-size: clamp(1.55rem, 5vw, 1.95rem);
   }
 }
 
@@ -1088,19 +1113,19 @@ body {
     background: rgba(250, 247, 242, 0.96);
   }
   .landing-nav {
-    height: 64px;
+    height: 60px;
   }
   .brand-link {
     gap: 8px;
   }
   .brand-logo-badge {
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
     border-radius: 8px;
   }
   .brand-info h1 {
-    font-size: 0.98rem;
+    font-size: 0.95rem;
   }
   .brand-info span {
     display: none; /* Sembunyikan sub-teks di layar kecil agar tidak sesak */
@@ -1109,190 +1134,198 @@ body {
     gap: 6px;
   }
   .btn-nav-admin {
-    padding: 7px 10px;
-    font-size: 0.78rem;
+    padding: 6px 10px;
+    font-size: 0.76rem;
   }
   .btn-nav-cta {
-    padding: 7px 12px;
-    font-size: 0.78rem;
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   .hero-section {
-    padding: 28px 0 45px;
+    padding: 24px 0 40px;
   }
   .hero-badge-pill {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     padding: 5px 12px;
-    margin-bottom: 16px;
-  }
-  .hero-title {
-    font-size: 1.85rem;
-    line-height: 1.22;
     margin-bottom: 14px;
   }
+  .hero-title {
+    font-size: 1.8rem;
+    line-height: 1.22;
+    margin-bottom: 12px;
+  }
   .hero-description {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.55;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .hero-cta-group {
     flex-direction: column;
     width: 100%;
     gap: 10px;
-    margin-bottom: 28px;
+    margin-bottom: 26px;
   }
   .btn-hero-primary,
   .btn-hero-secondary {
     width: 100%;
     justify-content: center;
-    padding: 13px 20px;
-    font-size: 0.92rem;
+    padding: 12px 18px;
+    font-size: 0.9rem;
   }
 
   .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding-top: 18px;
+    gap: 6px;
+    padding-top: 16px;
   }
   .stat-item h3 {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
   .stat-item p {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
+    line-height: 1.25;
   }
 
-  /* 3D Phone Mockup di Mobile */
+  /* 3D Phone Mockup di Mobile: Pastikan tidak melebar keluar layar */
   .hero-mockup-wrapper {
-    margin-top: 24px;
-    max-width: 290px;
+    margin-top: 20px;
+    max-width: 270px;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
   }
   .phone-mockup {
-    width: 260px;
-    height: 510px;
+    width: 250px;
+    height: 490px;
     border-width: 6px;
-    border-radius: 32px;
+    border-radius: 30px;
+    margin: 0 auto;
   }
   .floating-badge {
-    padding: 6px 10px;
-    font-size: 0.7rem;
-    gap: 6px;
+    padding: 5px 9px;
+    font-size: 0.68rem;
+    gap: 5px;
+    max-width: 150px;
+    white-space: nowrap;
   }
   .floating-badge i {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
   }
   .floating-badge span {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
   .badge-top-left {
-    top: 15px;
-    left: -10px;
+    top: 12px;
+    left: 4px;
   }
   .badge-bottom-right {
-    bottom: 25px;
-    right: -10px;
+    bottom: 20px;
+    right: 4px;
   }
 
   .features-section,
   .themes-section,
   .pricing-section,
   .faq-section {
-    padding: 45px 0;
+    padding: 40px 0;
   }
   .section-header {
-    margin-bottom: 30px;
+    margin-bottom: 26px;
   }
   .section-pill {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     padding: 4px 10px;
   }
   .section-title {
-    font-size: 1.55rem;
+    font-size: 1.5rem;
     line-height: 1.28;
   }
   .section-subtitle {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
   }
 
   .feature-card {
-    padding: 20px 16px;
+    padding: 18px 14px;
   }
   .feature-icon-box {
-    width: 42px;
-    height: 42px;
-    font-size: 1.15rem;
-    margin-bottom: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
   }
   .feature-card h3 {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
   .feature-card p {
-    font-size: 0.84rem;
+    font-size: 0.82rem;
   }
 
   .theme-thumbnail-wrap {
-    height: 220px;
+    height: 200px;
   }
   .theme-card-body {
-    padding: 16px;
+    padding: 14px;
   }
 
   .pricing-card {
-    padding: 28px 18px;
+    padding: 24px 16px;
+    border-radius: 18px;
   }
   .price-amount {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
   .pricing-features li {
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     gap: 8px;
   }
 
   .faq-question {
-    padding: 14px 16px;
+    padding: 13px 14px;
   }
   .faq-question h4 {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.35;
   }
   .faq-answer {
-    font-size: 0.84rem;
-    padding: 0 16px;
+    font-size: 0.82rem;
+    padding: 0 14px;
   }
   .faq-item.active .faq-answer {
-    padding: 12px 16px 18px;
+    padding: 10px 14px 16px;
   }
 
   .cta-banner-section {
-    padding: 0 0 45px;
+    padding: 0 0 40px;
   }
   .cta-banner-card {
-    padding: 32px 18px;
-    border-radius: 18px;
+    padding: 28px 16px;
+    border-radius: 16px;
   }
   .cta-banner-card h2 {
-    font-size: 1.55rem;
+    font-size: 1.45rem;
   }
   .cta-banner-card p {
-    font-size: 0.88rem;
-    margin-bottom: 22px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
   }
 
   .landing-footer {
-    padding: 36px 0 24px;
+    padding: 32px 0 20px;
   }
   .footer-bottom {
     flex-direction: column;
     text-align: center;
-    gap: 16px;
+    gap: 14px;
   }
   .footer-links {
     justify-content: center;
     flex-wrap: wrap;
-    gap: 14px;
-    font-size: 0.82rem;
+    gap: 12px;
+    font-size: 0.8rem;
   }
 
   .floating-wa-btn {
@@ -1301,5 +1334,51 @@ body {
     font-size: 1.4rem;
     bottom: 16px;
     right: 16px;
+  }
+}
+
+/* Compact Mobile Screens (<= 380px) */
+@media (max-width: 380px) {
+  .container {
+    padding: 0 12px;
+  }
+  .landing-nav {
+    height: 56px;
+  }
+  .brand-info h1 {
+    font-size: 0.9rem;
+  }
+  .btn-nav-admin {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+  .btn-nav-cta {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+  .hero-title {
+    font-size: 1.6rem;
+  }
+  .stat-item h3 {
+    font-size: 1.05rem;
+  }
+  .stat-item p {
+    font-size: 0.62rem;
+  }
+  .phone-mockup {
+    width: 230px;
+    height: 460px;
+  }
+  .floating-badge {
+    font-size: 0.62rem;
+    padding: 4px 7px;
+  }
+  .section-title {
+    font-size: 1.35rem;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    font-size: 0.85rem;
+    padding: 11px 14px;
   }
 }
