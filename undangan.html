@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
+  <meta name="referrer" content="no-referrer">
+  
   <!-- SEO & Social Media Meta Tags -->
   <title>The Wedding of Arya & Annisa - Undangan Pernikahan Digital</title>
   <meta name="description" content="Maha Suci Allah yang telah mempersatukan kami. Kami mengundang Bapak/Ibu/Saudara/i untuk hadir memberikan doa restu pada pernikahan Raden Arya Pratama & Annisa Larasati Putri.">
@@ -36,6 +38,30 @@
 
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Early Cache Hydrator (Mencegah kedipan foto atau data default) -->
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var u = (params.get('u') || params.get('slug') || '').toLowerCase().trim();
+        var key = u ? 'wedding_custom_config_' + u : 'wedding_custom_config';
+        var cached = localStorage.getItem(key);
+        if (cached) {
+          var cfg = JSON.parse(cached);
+          var hero = (cfg.couple && cfg.couple.heroPhoto) || cfg.heroPhoto;
+          if (hero && (!u || !hero.includes('couple_hero.jpg'))) {
+            var styleEl = document.createElement('style');
+            styleEl.id = 'early-hero-style';
+            styleEl.textContent = 
+              '.cover-container { background-image: linear-gradient(180deg, rgba(23, 21, 19, 0.48) 0%, rgba(23, 21, 19, 0.78) 100%), url("' + hero + '") !important; }' +
+              '.hero-section { background-image: linear-gradient(180deg, rgba(23, 21, 19, 0.1) 0%, rgba(23, 21, 19, 0.85) 100%), url("' + hero + '") !important; }';
+            document.head.appendChild(styleEl);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body style="overflow: hidden;">
 
@@ -56,11 +82,11 @@
       <div class="cover-center">
         <div class="cover-title-script">Walimatul 'Urs</div>
         <h1 class="cover-names">
-          <span id="cover-groom-name">Arya</span>
+          <span id="cover-groom-name"></span>
           <span class="cover-ampersand">&</span>
-          <span id="cover-bride-name">Annisa</span>
+          <span id="cover-bride-name"></span>
         </h1>
-        <div id="cover-date-text" class="cover-date">20 . 12 . 2026</div>
+        <div id="cover-date-text" class="cover-date"></div>
       </div>
 
       <div class="cover-bottom">
@@ -129,8 +155,8 @@
     <section id="hero" class="hero-section">
       <div class="hero-content">
         <div class="hero-subtitle">The Wedding of</div>
-        <h2 id="hero-names" class="hero-title">Arya & Annisa</h2>
-        <div id="hero-date-badge" class="hero-date-badge">Minggu, 20 Desember 2026</div>
+        <h2 id="hero-names" class="hero-title"></h2>
+        <div id="hero-date-badge" class="hero-date-badge"></div>
       </div>
     </section>
 

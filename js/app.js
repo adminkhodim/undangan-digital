@@ -505,14 +505,102 @@ function initCountdown() {
   // Google Calendar Link Generator
   const gcalBtn = document.getElementById('btn-add-calendar');
   if (gcalBtn) {
-    const cal = WEDDING_CONFIG.googleCalendar;
-    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cal.title)}&dates=${cal.start}/${cal.end}&details=${encodeURIComponent(cal.details)}&location=${encodeURIComponent(cal.location)}`;
+    const groomName = (WEDDING_CONFIG.groom && (WEDDING_CONFIG.groom.shortName || WEDDING_CONFIG.groom.fullName)) || 'Arya';
+    const brideName = (WEDDING_CONFIG.bride && (WEDDING_CONFIG.bride.shortName || WEDDING_CONFIG.bride.fullName)) || 'Annisa';
+    const cal = WEDDING_CONFIG.googleCalendar || {
+      title: `Pernikahan ${groomName} & ${brideName}`,
+      details: `Doa restu pernikahan ${groomName} & ${brideName}`,
+      location: (WEDDING_CONFIG.events && WEDDING_CONFIG.events[0] && WEDDING_CONFIG.events[0].venue) || 'Tempat Acara'
+    };
+    const dt = new Date(WEDDING_CONFIG.targetDate);
+    const startIso = !isNaN(dt.getTime()) ? dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' : '20261023T010000Z';
+    const endIso = !isNaN(dt.getTime()) ? new Date(dt.getTime() + 4 * 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' : '20261023T050000Z';
+    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cal.title || `Pernikahan ${groomName} & ${brideName}`)}&dates=${cal.start || startIso}/${cal.end || endIso}&details=${encodeURIComponent(cal.details || '')}&location=${encodeURIComponent(cal.location || '')}`;
     gcalBtn.href = gcalUrl;
   }
 }
 
 /* ====================================================================
-   5. DATA MEMPELAI & QUOTE
+   5. FORMAT TANGGAL SAMPUL & HERO BANNER
+   ==================================================================== */
+function formatInvitationDate() {
+  let day = '';
+  let month = '';
+  let year = '';
+  let fullDateText = '';
+  let dayName = '';
+
+  const idDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const idMonths = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  // 1. Ambil dari event pertama jika tersedia
+  if (WEDDING_CONFIG.events && WEDDING_CONFIG.events.length > 0) {
+    const ev = WEDDING_CONFIG.events[0];
+    dayName = ev.dayName || '';
+    fullDateText = ev.dateFormatted || '';
+
+    if (fullDateText) {
+      // Contoh format: "23 Oktober 2026" atau "23-10-2026"
+      const parts = fullDateText.trim().split(/[\s,.-]+/);
+      if (parts.length >= 3) {
+        day = parts[0].padStart(2, '0');
+        const monthsMap = {
+          'januari': '01', 'jan': '01', '01': '01', '1': '01',
+          'februari': '02', 'feb': '02', '02': '02', '2': '02',
+          'maret': '03', 'mar': '03', '03': '03', '3': '03',
+          'april': '04', 'apr': '04', '04': '04', '4': '04',
+          'mei': '05', '05': '05', '5': '05',
+          'juni': '06', 'jun': '06', '06': '06', '6': '06',
+          'juli': '07', 'jul': '07', '07': '07', '7': '07',
+          'agustus': '08', 'ags': '08', 'agu': '08', '08': '08', '8': '08',
+          'september': '09', 'sep': '09', '09': '09', '9': '09',
+          'oktober': '10', 'okt': '10', '10': '10',
+          'november': '11', 'nov': '11', '11': '11',
+          'desember': '12', 'des': '12', '12': '12'
+        };
+        const mKey = parts[1].toLowerCase();
+        if (monthsMap[mKey]) month = monthsMap[mKey];
+        year = parts[2];
+      }
+    }
+  }
+
+  // 2. Jika targetDate ada dan data tanggal belum lengkap, sinkronkan dari targetDate
+  if (WEDDING_CONFIG.targetDate) {
+    const dt = new Date(WEDDING_CONFIG.targetDate);
+    if (!isNaN(dt.getTime())) {
+      if (!day) day = String(dt.getDate()).padStart(2, '0');
+      if (!month) month = String(dt.getMonth() + 1).padStart(2, '0');
+      if (!year) year = String(dt.getFullYear());
+      if (!dayName) dayName = idDays[dt.getDay()];
+      if (!fullDateText) fullDateText = `${dt.getDate()} ${idMonths[dt.getMonth()]} ${dt.getFullYear()}`;
+    }
+  }
+
+  // Fallback default
+  if (!day) day = '20';
+  if (!month) month = '12';
+  if (!year) year = '2026';
+  if (!fullDateText) fullDateText = `${day} ${idMonths[parseInt(month, 10) - 1] || 'Desember'} ${year}`;
+
+  // Update Cover Date Text: "23 . 10 . 2026"
+  const coverDateEl = document.getElementById('cover-date-text');
+  if (coverDateEl) {
+    coverDateEl.textContent = `${day} . ${month} . ${year}`;
+  }
+
+  // Update Hero Date Badge: "Jumat, 23 Oktober 2026"
+  const heroDateEl = document.getElementById('hero-date-badge');
+  if (heroDateEl) {
+    heroDateEl.textContent = (dayName && !fullDateText.includes(dayName)) ? `${dayName}, ${fullDateText}` : fullDateText;
+  }
+}
+
+/* ====================================================================
+   5b. DATA MEMPELAI & QUOTE
    ==================================================================== */
 function initCoupleData() {
   const groom = (WEDDING_CONFIG.couple && WEDDING_CONFIG.couple.groom) || WEDDING_CONFIG.groom || {};
@@ -561,22 +649,37 @@ function initCoupleData() {
     brideIg.textContent = bride.instagramHandle || '@instagram';
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const isMultiTenant = !!(urlParams.get('u') || urlParams.get('slug'));
+
   // Update Foto Mempelai & Hero
   const groomPhotoEl = document.getElementById('groom-photo');
-  if (groomPhotoEl && groom.photo) groomPhotoEl.src = groom.photo;
+  if (groomPhotoEl && groom.photo) {
+    if (!isMultiTenant || !groom.photo.includes('groom.jpg')) {
+      groomPhotoEl.src = groom.photo;
+    }
+  }
 
   const bridePhotoEl = document.getElementById('bride-photo');
-  if (bridePhotoEl && bride.photo) bridePhotoEl.src = bride.photo;
+  if (bridePhotoEl && bride.photo) {
+    if (!isMultiTenant || !bride.photo.includes('bride.jpg')) {
+      bridePhotoEl.src = bride.photo;
+    }
+  }
 
-  const heroPhoto = (WEDDING_CONFIG.couple && WEDDING_CONFIG.couple.heroPhoto) || WEDDING_CONFIG.heroPhoto;
+  let heroPhoto = (WEDDING_CONFIG.couple && WEDDING_CONFIG.couple.heroPhoto) || WEDDING_CONFIG.heroPhoto;
+  if (isMultiTenant && heroPhoto && heroPhoto.includes('couple_hero.jpg')) {
+    heroPhoto = '';
+  }
+
   if (heroPhoto) {
     const heroSec = document.getElementById('hero');
     if (heroSec) {
-      heroSec.style.backgroundImage = `linear-gradient(180deg, rgba(23, 21, 19, 0.1) 0%, rgba(23, 21, 19, 0.85) 100%), url('${heroPhoto}')`;
+      heroSec.style.setProperty('background-image', `linear-gradient(180deg, rgba(23, 21, 19, 0.1) 0%, rgba(23, 21, 19, 0.85) 100%), url('${heroPhoto}')`, 'important');
     }
     const coverContainer = document.querySelector('.cover-container');
     if (coverContainer) {
-      coverContainer.style.backgroundImage = `linear-gradient(180deg, rgba(23, 21, 19, 0.5) 0%, rgba(23, 21, 19, 0.75) 100%), url('${heroPhoto}')`;
+      coverContainer.style.setProperty('background-image', `linear-gradient(180deg, rgba(23, 21, 19, 0.5) 0%, rgba(23, 21, 19, 0.75) 100%), url('${heroPhoto}')`, 'important');
     }
   }
 
@@ -595,6 +698,9 @@ function initCoupleData() {
 
   const closingNames = document.querySelector('.closing-names');
   if (closingNames) closingNames.textContent = `${groomShort} & ${brideShort}`;
+
+  // Format Tanggal Cover & Hero
+  formatInvitationDate();
 }
 
 /* ====================================================================
