@@ -1003,7 +1003,7 @@ body {
 }
 
 /* ====================================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN (MOBILE & TABLET OPTIMIZATIONS)
    ==================================================================== */
 @media (max-width: 1024px) {
   .hero-grid {
@@ -1024,7 +1024,7 @@ body {
   }
   .themes-grid, .pricing-grid {
     grid-template-columns: 1fr;
-    max-width: 480px;
+    max-width: 440px;
     margin: 0 auto;
   }
   .pricing-card.popular {
@@ -1036,10 +1036,270 @@ body {
   .nav-links {
     display: none;
   }
+  .landing-nav {
+    height: 68px;
+  }
+  .brand-logo-badge {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+  .brand-info h1 {
+    font-size: 1.1rem;
+  }
+  .brand-info span {
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+  }
+  .btn-nav-admin {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  .btn-nav-cta {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+  .hero-section {
+    padding: 40px 0 60px;
+  }
   .hero-title {
-    font-size: 2.2rem;
+    font-size: clamp(1.9rem, 6vw, 2.4rem);
+    line-height: 1.2;
+  }
+  .hero-description {
+    font-size: 0.98rem;
+    line-height: 1.6;
   }
   .features-grid {
     grid-template-columns: 1fr;
+  }
+  .section-title {
+    font-size: clamp(1.6rem, 5vw, 1.95rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 16px;
+  }
+  .landing-header {
+    background: rgba(250, 247, 242, 0.96);
+  }
+  .landing-nav {
+    height: 64px;
+  }
+  .brand-link {
+    gap: 8px;
+  }
+  .brand-logo-badge {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  .brand-info h1 {
+    font-size: 0.98rem;
+  }
+  .brand-info span {
+    display: none; /* Sembunyikan sub-teks di layar kecil agar tidak sesak */
+  }
+  .nav-action-buttons {
+    gap: 6px;
+  }
+  .btn-nav-admin {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+  }
+  .btn-nav-cta {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  .hero-section {
+    padding: 28px 0 45px;
+  }
+  .hero-badge-pill {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+    line-height: 1.22;
+    margin-bottom: 14px;
+  }
+  .hero-description {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 20px;
+    font-size: 0.92rem;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 18px;
+  }
+  .stat-item h3 {
+    font-size: 1.25rem;
+  }
+  .stat-item p {
+    font-size: 0.72rem;
+  }
+
+  /* 3D Phone Mockup di Mobile */
+  .hero-mockup-wrapper {
+    margin-top: 24px;
+    max-width: 290px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .phone-mockup {
+    width: 260px;
+    height: 510px;
+    border-width: 6px;
+    border-radius: 32px;
+  }
+  .floating-badge {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    gap: 6px;
+  }
+  .floating-badge i {
+    font-size: 0.88rem;
+  }
+  .floating-badge span {
+    font-size: 0.72rem;
+  }
+  .badge-top-left {
+    top: 15px;
+    left: -10px;
+  }
+  .badge-bottom-right {
+    bottom: 25px;
+    right: -10px;
+  }
+
+  .features-section,
+  .themes-section,
+  .pricing-section,
+  .faq-section {
+    padding: 45px 0;
+  }
+  .section-header {
+    margin-bottom: 30px;
+  }
+  .section-pill {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+  .section-title {
+    font-size: 1.55rem;
+    line-height: 1.28;
+  }
+  .section-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .feature-card {
+    padding: 20px 16px;
+  }
+  .feature-icon-box {
+    width: 42px;
+    height: 42px;
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+  }
+  .feature-card h3 {
+    font-size: 1.05rem;
+  }
+  .feature-card p {
+    font-size: 0.84rem;
+  }
+
+  .theme-thumbnail-wrap {
+    height: 220px;
+  }
+  .theme-card-body {
+    padding: 16px;
+  }
+
+  .pricing-card {
+    padding: 28px 18px;
+  }
+  .price-amount {
+    font-size: 2.2rem;
+  }
+  .pricing-features li {
+    font-size: 0.84rem;
+    gap: 8px;
+  }
+
+  .faq-question {
+    padding: 14px 16px;
+  }
+  .faq-question h4 {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+  .faq-answer {
+    font-size: 0.84rem;
+    padding: 0 16px;
+  }
+  .faq-item.active .faq-answer {
+    padding: 12px 16px 18px;
+  }
+
+  .cta-banner-section {
+    padding: 0 0 45px;
+  }
+  .cta-banner-card {
+    padding: 32px 18px;
+    border-radius: 18px;
+  }
+  .cta-banner-card h2 {
+    font-size: 1.55rem;
+  }
+  .cta-banner-card p {
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+  }
+
+  .landing-footer {
+    padding: 36px 0 24px;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  .footer-links {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 0.82rem;
+  }
+
+  .floating-wa-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    bottom: 16px;
+    right: 16px;
   }
 }

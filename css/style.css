@@ -2047,6 +2047,24 @@ textarea.form-control {
   .qris-img-wrapper {
     max-width: 250px;
   }
+
+  .theme-preview-pill {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    transform: none;
+    padding: 3px 8px;
+    gap: 5px;
+    max-width: calc(100% - 75px);
+  }
+
+  .theme-pill-label {
+    display: none;
+  }
+
+  .theme-pill-btn {
+    font-size: 0.68rem;
+    padding: 2px 7px;
+  }
 }
 
 /* Compact Mobile Screens (<= 380px, e.g. iPhone SE, Galaxy Z Flip outer, etc.) */

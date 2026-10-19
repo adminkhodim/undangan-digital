@@ -739,14 +739,18 @@ body {
   border-left-color: #E63946;
 }
 
-/* Responsive */
+/* Responsive Mobile & Tablet Optimizations */
 @media (max-width: 900px) {
   .saas-grid {
     grid-template-columns: 1fr;
   }
+  .register-card {
+    order: 1; /* Form pendaftaran tampil pertama agar pengguna langsung dapat mengisi */
+  }
   .preview-panel {
-    order: -1;
+    order: 2;
     position: static;
+    margin-top: 24px;
   }
   .saas-hero-header h2 {
     font-size: 1.8rem;
@@ -754,14 +758,106 @@ body {
 }
 
 @media (max-width: 600px) {
+  .saas-navbar {
+    padding: 14px 16px;
+  }
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+  .brand-text h1 {
+    font-size: 1.05rem;
+  }
+  .brand-text span {
+    display: none; /* Sembunyikan sub-teks di layar kecil */
+  }
+  .btn-login-admin {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .saas-container {
+    padding: 10px 16px 40px;
+  }
+  .saas-hero-header {
+    margin-bottom: 24px;
+  }
+  .saas-hero-header .hero-pill {
+    font-size: 0.72rem;
+    padding: 4px 12px;
+  }
+  .saas-hero-header h2 {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+  .saas-hero-header p {
+    font-size: 0.88rem;
+  }
+
   .form-group-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
   .register-card {
-    padding: 24px 18px;
+    padding: 22px 16px;
+    border-radius: 18px;
+  }
+  .form-step-title {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  .step-text h3 {
+    font-size: 1.02rem;
+  }
+  .step-text p {
+    font-size: 0.78rem;
+  }
+  .form-input {
+    padding: 12px 14px 12px 42px;
+    font-size: 0.92rem;
+  }
+  .btn-submit-register {
+    padding: 14px 18px;
+    font-size: 0.92rem;
+  }
+
+  .preview-card-wrap {
+    padding: 20px 16px;
+  }
+  .phone-mockup-frame {
+    max-width: 260px;
+    border-width: 6px;
+    border-radius: 28px;
+    padding: 10px;
+  }
+  .phone-screen {
+    padding: 22px 12px;
+    border-radius: 20px;
+  }
+
+  .success-modal-card {
+    padding: 26px 18px;
+    width: calc(100% - 28px);
+    max-width: 420px;
+    border-radius: 20px;
+  }
+  .success-modal-card h3 {
+    font-size: 1.35rem;
   }
   .modal-action-buttons {
     flex-direction: column;
+    gap: 10px;
+  }
+  .btn-primary-action,
+  .btn-secondary-action {
+    padding: 13px 18px;
+    font-size: 0.92rem;
   }
 }
