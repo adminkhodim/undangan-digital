@@ -66,13 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
             initLoveStory();
             initGallery();
             initGifts();
-          } catch (err) {}
+            if (typeof observeReveals === 'function') {
+              observeReveals();
+            }
+          } catch (err) {
+            console.error('[App] Error updating cloud config view:', err);
+          }
         }
         if (res && res.statusUser) {
           renderPreviewModeBadge(res.statusUser, res.paket);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.warn('[App] Gagal mengambil cloud config:', err);
+      });
   }
 
   const tasks = [
@@ -201,9 +208,11 @@ function initCover() {
     playBackgroundMusic();
 
     // Trigger reveal animations immediately
-    checkReveals();
+    if (typeof observeReveals === 'function') observeReveals();
+    else checkReveals();
     setTimeout(() => {
-      checkReveals();
+      if (typeof observeReveals === 'function') observeReveals();
+      else checkReveals();
       window.dispatchEvent(new Event('scroll'));
     }, 300);
 
@@ -591,39 +600,108 @@ function initCoupleData() {
 /* ====================================================================
    6. RANGKAIAN ACARA & MAPS TOGGLE
    ==================================================================== */
+function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
+  let navUrl = (rawUrl || '').toString().trim();
+  let embedUrl = (rawEmbedUrl || '').toString().trim();
+
+  // Jika navUrl berisi tag <iframe>
+  if (navUrl.includes('<iframe') || navUrl.includes('src=')) {
+    const srcMatch = navUrl.match(/src=["']([^"']+)["']/i);
+    if (srcMatch && srcMatch[1]) {
+      embedUrl = srcMatch[1];
+    }
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Jika embedUrl berisi tag <iframe>
+  if (embedUrl.includes('<iframe') || embedUrl.includes('src=')) {
+    const srcMatch = embedUrl.match(/src=["']([^"']+)["']/i);
+    if (srcMatch && srcMatch[1]) {
+      embedUrl = srcMatch[1];
+    }
+  }
+
+  // Jika embedUrl belum ada tapi navUrl adalah url embed
+  if (!embedUrl && navUrl.includes('/maps/embed')) {
+    embedUrl = navUrl;
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Fallback jika navUrl kosong
+  if (!navUrl) {
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Fallback jika embedUrl kosong
+  if (!embedUrl) {
+    const query = [venue, address].filter(Boolean).join(', ');
+    embedUrl = query ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
+  }
+
+  return { navUrl, embedUrl };
+}
+
 function initEvents() {
   const container = document.getElementById('events-container');
   if (!container) return;
 
-  container.innerHTML = WEDDING_CONFIG.events.map((evt, idx) => `
-    <div class="event-card reveal">
-      <span class="event-badge">${evt.badge}</span>
-      <h3 class="event-title">${evt.title}</h3>
-      <div class="event-details">
-        <div class="event-detail-item">
-          <i class="fa-regular fa-calendar text-gold"></i>
-          <span><strong>${evt.dayName}</strong>, ${evt.dateFormatted}</span>
+  const events = (WEDDING_CONFIG.events && Array.isArray(WEDDING_CONFIG.events)) ? WEDDING_CONFIG.events : [];
+  if (events.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.95rem;">
+        <i class="fa-regular fa-calendar-check text-gold" style="font-size: 2.2rem; margin-bottom: 0.8rem; display: block;"></i>
+        Informasi detail rangkaian acara akan segera diperbarui.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = events.map((evt, idx) => {
+    const mapInfo = parseMapUrls(evt.mapsUrl, evt.mapsEmbedUrl, evt.venue, evt.address);
+    const dayName = evt.dayName || 'Acara';
+    const dateFormatted = evt.dateFormatted || '';
+    const dateDisplay = (dayName && dateFormatted) ? `<strong>${escapeHtml(dayName)}</strong>, ${escapeHtml(dateFormatted)}` : escapeHtml(dateFormatted || dayName);
+
+    return `
+      <div class="event-card reveal">
+        <span class="event-badge">${escapeHtml(evt.badge || 'Acara')}</span>
+        <h3 class="event-title">${escapeHtml(evt.title || 'Rangkaian Acara')}</h3>
+        <div class="event-details">
+          <div class="event-detail-item">
+            <i class="fa-regular fa-calendar text-gold"></i>
+            <span>${dateDisplay}</span>
+          </div>
+          ${evt.time ? `
+          <div class="event-detail-item">
+            <i class="fa-regular fa-clock text-gold"></i>
+            <span>${escapeHtml(evt.time)}</span>
+          </div>` : ''}
+          ${evt.venue ? `<div class="event-venue">${escapeHtml(evt.venue)}</div>` : ''}
+          ${evt.address ? `<div class="event-address">${escapeHtml(evt.address)}</div>` : ''}
         </div>
-        <div class="event-detail-item">
-          <i class="fa-regular fa-clock text-gold"></i>
-          <span>${evt.time}</span>
+        <div class="event-actions">
+          <a href="${escapeHtml(mapInfo.navUrl)}" target="_blank" rel="noopener noreferrer" class="btn-maps">
+            <i class="fa-solid fa-location-dot"></i> Buka Petunjuk Arah (Maps)
+          </a>
+          ${mapInfo.embedUrl ? `
+          <button type="button" class="btn-view-map" onclick="toggleMapEmbed('map-embed-${idx}')">
+            <i class="fa-solid fa-map"></i> Lihat Denah Lokasi
+          </button>` : ''}
         </div>
-        <div class="event-venue">${evt.venue}</div>
-        <div class="event-address">${evt.address}</div>
+        ${mapInfo.embedUrl ? `
+        <div id="map-embed-${idx}" class="map-embed-wrapper">
+          <iframe src="${escapeHtml(mapInfo.embedUrl)}" allowfullscreen="" loading="lazy"></iframe>
+        </div>` : ''}
       </div>
-      <div class="event-actions">
-        <a href="${evt.mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">
-          <i class="fa-solid fa-location-dot"></i> Buka Petunjuk Arah (Maps)
-        </a>
-        <button type="button" class="btn-view-map" onclick="toggleMapEmbed('map-embed-${idx}')">
-          <i class="fa-solid fa-map"></i> Lihat Denah Lokasi
-        </button>
-      </div>
-      <div id="map-embed-${idx}" class="map-embed-wrapper">
-        <iframe src="${evt.mapsEmbedUrl}" allowfullscreen="" loading="lazy"></iframe>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  if (typeof observeReveals === 'function') {
+    observeReveals();
+  }
 }
 
 window.toggleMapEmbed = function(elementId) {
@@ -640,16 +718,26 @@ function initLoveStory() {
   const container = document.getElementById('timeline-container');
   if (!container) return;
 
-  container.innerHTML = WEDDING_CONFIG.loveStory.map((story) => `
+  const stories = (WEDDING_CONFIG.loveStory && Array.isArray(WEDDING_CONFIG.loveStory)) ? WEDDING_CONFIG.loveStory : [];
+  if (stories.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = stories.map((story) => `
     <div class="timeline-item reveal">
       <div class="timeline-dot"></div>
       <div class="timeline-card">
-        <span class="timeline-year">${story.year}</span>
-        <h4 class="timeline-title">${story.title}</h4>
-        <p class="timeline-desc">${story.description}</p>
+        <span class="timeline-year">${escapeHtml(story.year || '')}</span>
+        <h4 class="timeline-title">${escapeHtml(story.title || '')}</h4>
+        <p class="timeline-desc">${escapeHtml(story.description || '')}</p>
       </div>
     </div>
   `).join('');
+
+  if (typeof observeReveals === 'function') {
+    observeReveals();
+  }
 }
 
 /* ====================================================================
@@ -664,11 +752,17 @@ function initGallery() {
 
   if (!grid) return;
 
-  grid.innerHTML = WEDDING_CONFIG.gallery.map((item, idx) => `
-    <div class="gallery-item ${idx === 0 || idx === 5 ? 'span-2' : ''} reveal" onclick="openLightbox('${item.url}', '${item.title}')">
-      <img src="${item.url}" alt="${item.title}" loading="lazy">
+  const photos = (WEDDING_CONFIG.gallery && Array.isArray(WEDDING_CONFIG.gallery)) ? WEDDING_CONFIG.gallery : [];
+  if (photos.length === 0) {
+    grid.innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = photos.map((item, idx) => `
+    <div class="gallery-item ${idx === 0 || idx === 5 ? 'span-2' : ''} reveal" onclick="openLightbox('${escapeHtml(item.url)}', '${escapeHtml(item.title)}')">
+      <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.title)}" loading="lazy">
       <div class="gallery-item-overlay">
-        <span class="gallery-item-title">${item.title}</span>
+        <span class="gallery-item-title">${escapeHtml(item.title)}</span>
       </div>
     </div>
   `).join('');
@@ -688,6 +782,10 @@ function initGallery() {
       if (e.target === modal) modal.classList.remove('active');
     });
   }
+
+  if (typeof observeReveals === 'function') {
+    observeReveals();
+  }
 }
 
 /* ====================================================================
@@ -698,67 +796,93 @@ function initGifts() {
   const container = document.getElementById('bank-accounts-container');
   const physicalContainer = document.getElementById('physical-gift-container');
 
+  // Update Teks Pengantar
+  const introEl = document.querySelector('.gift-intro');
+  if (introEl && WEDDING_CONFIG.gifts && WEDDING_CONFIG.gifts.introText) {
+    introEl.textContent = WEDDING_CONFIG.gifts.introText;
+  }
+
   // Render QRIS Card
   const qris = WEDDING_CONFIG.gifts && WEDDING_CONFIG.gifts.qris;
-  if (qrisContainer && qris && qris.enable) {
-    qrisContainer.innerHTML = `
-      <div class="qris-card reveal">
-        <div class="qris-badge-top">
-          <span class="qris-logo-text">QRIS</span>
-          <span class="qris-subtext">Standar Pembayaran Nasional</span>
+  if (qrisContainer) {
+    if (qris && qris.enable) {
+      qrisContainer.innerHTML = `
+        <div class="qris-card reveal">
+          <div class="qris-badge-top">
+            <span class="qris-logo-text">QRIS</span>
+            <span class="qris-subtext">Standar Pembayaran Nasional</span>
+          </div>
+          <p class="qris-desc">Pindai QRIS untuk mengirim tanda kasih via BCA Mobile, Mandiri Livin', GoPay, OVO, Dana, atau ShopeePay</p>
+          <button type="button" class="btn-qris" onclick="openQrisModal()">
+            <i class="fa-solid fa-qrcode"></i> <span>Tampilkan QRIS</span>
+          </button>
         </div>
-        <p class="qris-desc">Pindai QRIS untuk mengirim tanda kasih via BCA Mobile, Mandiri Livin', GoPay, OVO, Dana, atau ShopeePay</p>
-        <button type="button" class="btn-qris" onclick="openQrisModal()">
-          <i class="fa-solid fa-qrcode"></i> <span>Tampilkan QRIS</span>
-        </button>
-      </div>
-    `;
+      `;
 
-    const qrisImgTag = document.getElementById('qris-img-tag');
-    if (qrisImgTag && qris.image) qrisImgTag.src = qris.image;
+      const qrisImgTag = document.getElementById('qris-img-tag');
+      if (qrisImgTag && qris.image) qrisImgTag.src = qris.image;
 
-    const qrisMerchantEl = document.getElementById('qris-modal-merchant');
-    if (qrisMerchantEl && qris.accountName) qrisMerchantEl.textContent = qris.accountName;
+      const qrisMerchantEl = document.getElementById('qris-modal-merchant');
+      if (qrisMerchantEl && qris.accountName) qrisMerchantEl.textContent = qris.accountName;
 
-    const btnDownloadQris = document.getElementById('btn-download-qris');
-    if (btnDownloadQris && qris.image) btnDownloadQris.href = qris.image;
+      const btnDownloadQris = document.getElementById('btn-download-qris');
+      if (btnDownloadQris && qris.image) btnDownloadQris.href = qris.image;
+    } else {
+      qrisContainer.innerHTML = '';
+    }
   }
 
   // Render Bank Accounts
   if (container) {
-    container.innerHTML = WEDDING_CONFIG.gifts.bankAccounts.map((acc, idx) => `
-      <div class="bank-card reveal">
-        <div class="bank-card-top">
-          <span class="bank-badge text-gold">${acc.badge || acc.bank}</span>
-          <div class="bank-chip"></div>
+    const bankAccounts = (WEDDING_CONFIG.gifts && Array.isArray(WEDDING_CONFIG.gifts.bankAccounts)) ? WEDDING_CONFIG.gifts.bankAccounts : [];
+    container.innerHTML = bankAccounts.map((acc, idx) => {
+      const accNum = (acc.accountNumber !== undefined && acc.accountNumber !== null) ? String(acc.accountNumber).trim() : '';
+      const bankName = acc.badge || acc.bank || 'Bank';
+      const holder = acc.accountName || '';
+
+      return `
+        <div class="bank-card reveal">
+          <div class="bank-card-top">
+            <span class="bank-badge text-gold">${escapeHtml(bankName)}</span>
+            <div class="bank-chip"></div>
+          </div>
+          <div class="account-number-wrapper">
+            <div class="account-label">Nomor Rekening</div>
+            <div class="account-number" id="acc-num-${idx}">${escapeHtml(accNum)}</div>
+          </div>
+          <div class="account-name">a.n. ${escapeHtml(holder)}</div>
+          <button type="button" class="btn-copy" data-copy="${escapeHtml(accNum)}" onclick="copyFromData(this)">
+            <i class="fa-regular fa-copy"></i> <span>Salin No. Rekening</span>
+          </button>
         </div>
-        <div class="account-number-wrapper">
-          <div class="account-label">Nomor Rekening</div>
-          <div class="account-number" id="acc-num-${idx}">${acc.accountNumber}</div>
-        </div>
-        <div class="account-name">a.n. ${acc.accountName}</div>
-        <button type="button" class="btn-copy" onclick="copyToClipboard('${acc.accountNumber}', this)">
-          <i class="fa-regular fa-copy"></i> <span>Salin No. Rekening</span>
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
-  if (physicalContainer && WEDDING_CONFIG.gifts.physicalGift && WEDDING_CONFIG.gifts.physicalGift.enable) {
-    const gift = WEDDING_CONFIG.gifts.physicalGift;
-    physicalContainer.innerHTML = `
-      <div class="physical-gift-card reveal">
-        <i class="fa-solid fa-gift text-gold" style="font-size: 2rem; margin-bottom: 0.8rem;"></i>
-        <h4 class="physical-gift-title">Kirim Hadiah Fisik</h4>
-        <p class="physical-gift-address">
-          <strong>Penerima:</strong> ${gift.recipientName} (${gift.phone})<br>
-          ${gift.address}
-        </p>
-        <button type="button" class="btn-copy" onclick="copyToClipboard('${gift.address}', this)">
-          <i class="fa-regular fa-copy"></i> <span>Salin Alamat Lengkap</span>
-        </button>
-      </div>
-    `;
+  // Render Physical Gift
+  if (physicalContainer) {
+    const gift = WEDDING_CONFIG.gifts && WEDDING_CONFIG.gifts.physicalGift;
+    if (gift && gift.enable && (gift.address || gift.recipientName)) {
+      const recipient = gift.recipientName || '';
+      const phone = gift.phone ? `(${gift.phone})` : '';
+      const address = gift.address || '';
+
+      physicalContainer.innerHTML = `
+        <div class="physical-gift-card reveal">
+          <i class="fa-solid fa-gift text-gold" style="font-size: 2rem; margin-bottom: 0.8rem;"></i>
+          <h4 class="physical-gift-title">Kirim Hadiah Fisik</h4>
+          <p class="physical-gift-address">
+            <strong>Penerima:</strong> ${escapeHtml(recipient)} ${escapeHtml(phone)}<br>
+            ${escapeHtml(address)}
+          </p>
+          <button type="button" class="btn-copy" data-copy="${escapeHtml(address)}" onclick="copyFromData(this)">
+            <i class="fa-regular fa-copy"></i> <span>Salin Alamat Lengkap</span>
+          </button>
+        </div>
+      `;
+    } else {
+      physicalContainer.innerHTML = '';
+    }
   }
 
   // Modal QRIS Event Listener
@@ -767,6 +891,10 @@ function initGifts() {
     qrisModal.addEventListener('click', (e) => {
       if (e.target === qrisModal) closeQrisModal();
     });
+  }
+
+  if (typeof observeReveals === 'function') {
+    observeReveals();
   }
 }
 
@@ -778,6 +906,11 @@ window.openQrisModal = function() {
 window.closeQrisModal = function() {
   const modal = document.getElementById('qris-modal');
   if (modal) modal.classList.remove('active');
+};
+
+window.copyFromData = function(btnElement) {
+  const text = btnElement.getAttribute('data-copy') || '';
+  window.copyToClipboard(text, btnElement);
 };
 
 window.copyToClipboard = function(text, btnElement) {
@@ -987,49 +1120,61 @@ function escapeHtml(text) {
 /* ====================================================================
    11. SCROLL REVEAL ANIMATIONS (DUAL OBSERVER & FALLBACK)
    ==================================================================== */
+let revealObserver = null;
+
 function checkReveals() {
   const reveals = document.querySelectorAll('.reveal:not(.visible)');
   const windowHeight = window.innerHeight;
   reveals.forEach(el => {
     const rect = el.getBoundingClientRect();
-    if (rect.top <= windowHeight + 120) {
+    if (rect.top <= windowHeight + 150) {
       el.classList.add('visible');
     }
   });
 }
 
-function initScrollAnimations() {
-  const reveals = document.querySelectorAll('.reveal');
-
+function observeReveals() {
+  const reveals = document.querySelectorAll('.reveal:not(.visible)');
   if ('IntersectionObserver' in window) {
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.05,
+        rootMargin: '120px 0px 120px 0px'
       });
-    }, {
-      threshold: 0.05,
-      rootMargin: '120px 0px 120px 0px'
-    });
+    }
 
-    reveals.forEach(el => revealObserver.observe(el));
-  } else {
-    // Fallback debounced scroll listener hanya jika IntersectionObserver tidak didukung browser jadul
-    let scrollTimeout = null;
-    window.addEventListener('scroll', () => {
-      if (!scrollTimeout) {
-        scrollTimeout = setTimeout(() => {
-          checkReveals();
-          scrollTimeout = null;
-        }, 120);
-      }
-    }, { passive: true });
+    reveals.forEach(el => {
+      revealObserver.observe(el);
+    });
   }
 
-  // Initial check saat halaman pertama kali dibuka
+  // Jalankan checkReveals agar elemen yang sudah ada di viewport langsung terlihat
   checkReveals();
+}
+
+function initScrollAnimations() {
+  observeReveals();
+
+  // Scroll listener untuk fallback dan keandalan penuh
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    if (!scrollTimeout) {
+      scrollTimeout = setTimeout(() => {
+        checkReveals();
+        scrollTimeout = null;
+      }, 100);
+    }
+  }, { passive: true });
+
+  // Panggil ulang saat resize atau tab berganti
+  window.addEventListener('resize', checkReveals);
 }
 
 /* ====================================================================

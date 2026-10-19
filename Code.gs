@@ -581,6 +581,27 @@ function saveAllConfigToSheets(ss, cfg) {
   clearDataRows(sAcara);
   var events = cfg.events || [];
   events.forEach(function(ev, idx) {
+    var rawMapsUrl = (ev.mapsUrl || '').toString().trim();
+    var rawMapsEmbed = (ev.mapsEmbedUrl || '').toString().trim();
+    var venue = (ev.venue || '').toString().trim();
+    var address = (ev.address || '').toString().trim();
+
+    // Auto-ekstrak jika user menempelkan kode <iframe ...>
+    if (rawMapsUrl.indexOf('<iframe') !== -1 || rawMapsUrl.indexOf('src=') !== -1) {
+      var matchSrc = rawMapsUrl.match(/src=["']([^"']+)["']/i);
+      if (matchSrc && matchSrc[1]) {
+        rawMapsEmbed = matchSrc[1];
+      }
+      var query = [venue, address].filter(Boolean).join(', ');
+      rawMapsUrl = query ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(query) : 'https://maps.google.com';
+    }
+    if (rawMapsEmbed.indexOf('<iframe') !== -1 || rawMapsEmbed.indexOf('src=') !== -1) {
+      var matchSrc2 = rawMapsEmbed.match(/src=["']([^"']+)["']/i);
+      if (matchSrc2 && matchSrc2[1]) {
+        rawMapsEmbed = matchSrc2[1];
+      }
+    }
+
     sAcara.appendRow([
       ev.id || ('acara-' + idx),
       ev.title || '',
@@ -588,10 +609,10 @@ function saveAllConfigToSheets(ss, cfg) {
       ev.dayName || '',
       ev.dateFormatted || '',
       ev.time || '',
-      ev.venue || '',
-      ev.address || '',
-      ev.mapsUrl || '',
-      ev.mapsEmbedUrl || ''
+      venue,
+      address,
+      rawMapsUrl,
+      rawMapsEmbed
     ]);
   });
 
@@ -786,6 +807,29 @@ function readAllConfigFromSheets(ss) {
   if (sAcara && sAcara.getLastRow() > 1) {
     var rowsA = sAcara.getRange(2, 1, sAcara.getLastRow() - 1, 10).getValues();
     rowsA.forEach(function(r, idx) {
+      var rawMapsUrl = (r[8] || '').toString().trim();
+      var rawMapsEmbed = (r[9] || '').toString().trim();
+      var venue = (r[6] || '').toString().trim();
+      var address = (r[7] || '').toString().trim();
+
+      // Sanitasi jika tersimpan tag iframe
+      if (rawMapsUrl.indexOf('<iframe') !== -1 || rawMapsUrl.indexOf('src=') !== -1) {
+        var matchSrc = rawMapsUrl.match(/src=["']([^"']+)["']/i);
+        if (matchSrc && matchSrc[1]) {
+          if (!rawMapsEmbed || rawMapsEmbed.indexOf('Hotel Mulia') !== -1) {
+            rawMapsEmbed = matchSrc[1];
+          }
+        }
+        var query = [venue, address].filter(Boolean).join(', ');
+        rawMapsUrl = query ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(query) : 'https://maps.google.com';
+      }
+      if (rawMapsEmbed.indexOf('<iframe') !== -1 || rawMapsEmbed.indexOf('src=') !== -1) {
+        var matchSrc2 = rawMapsEmbed.match(/src=["']([^"']+)["']/i);
+        if (matchSrc2 && matchSrc2[1]) {
+          rawMapsEmbed = matchSrc2[1];
+        }
+      }
+
       result.events.push({
         id: r[0] || ('acara-' + idx),
         title: r[1] || '',
@@ -793,10 +837,10 @@ function readAllConfigFromSheets(ss) {
         dayName: r[3] || '',
         dateFormatted: r[4] || '',
         time: r[5] || '',
-        venue: r[6] || '',
-        address: r[7] || '',
-        mapsUrl: r[8] || '',
-        mapsEmbedUrl: r[9] || ''
+        venue: venue,
+        address: address,
+        mapsUrl: rawMapsUrl,
+        mapsEmbedUrl: rawMapsEmbed
       });
     });
   }
@@ -838,13 +882,13 @@ function readAllConfigFromSheets(ss) {
           enable: (r[5] || '').toString().toLowerCase() !== 'nonaktif',
           image: r[4] || 'assets/images/qris.svg',
           accountName: r[3] || '',
-          nmid: r[2] || ''
+          nmid: (r[2] !== undefined && r[2] !== null) ? r[2].toString().trim() : ''
         };
       } else if (tipe.indexOf('bank') !== -1 || tipe.indexOf('rekening') !== -1) {
         result.gifts.bankAccounts.push({
           bank: r[1] || 'Bank',
           badge: r[1] || 'Bank',
-          accountNumber: r[2] || '',
+          accountNumber: (r[2] !== undefined && r[2] !== null) ? r[2].toString().trim() : '',
           accountName: r[3] || '',
           logoColor: r[4] || '#005596'
         });
@@ -852,7 +896,7 @@ function readAllConfigFromSheets(ss) {
         result.gifts.physicalGift = {
           enable: true,
           recipientName: r[1] || '',
-          phone: r[2] || '',
+          phone: (r[2] !== undefined && r[2] !== null) ? r[2].toString().trim() : '',
           address: r[5] || ''
         };
       }

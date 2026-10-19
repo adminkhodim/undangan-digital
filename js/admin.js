@@ -714,6 +714,60 @@ function initDynamicListControls() {
   });
 }
 
+function escapeAdminAttr(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
+  let navUrl = (rawUrl || '').toString().trim();
+  let embedUrl = (rawEmbedUrl || '').toString().trim();
+
+  // Jika navUrl berisi tag <iframe>
+  if (navUrl.includes('<iframe') || navUrl.includes('src=')) {
+    const srcMatch = navUrl.match(/src=["']([^"']+)["']/i);
+    if (srcMatch && srcMatch[1]) {
+      embedUrl = srcMatch[1];
+    }
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Jika embedUrl berisi tag <iframe>
+  if (embedUrl.includes('<iframe') || embedUrl.includes('src=')) {
+    const srcMatch = embedUrl.match(/src=["']([^"']+)["']/i);
+    if (srcMatch && srcMatch[1]) {
+      embedUrl = srcMatch[1];
+    }
+  }
+
+  // Jika embedUrl belum ada tapi navUrl adalah url embed
+  if (!embedUrl && navUrl.includes('/maps/embed')) {
+    embedUrl = navUrl;
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Fallback jika navUrl kosong
+  if (!navUrl) {
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
+  }
+
+  // Fallback jika embedUrl kosong
+  if (!embedUrl) {
+    const query = [venue, address].filter(Boolean).join(', ');
+    embedUrl = query ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
+  }
+
+  return { navUrl, embedUrl };
+}
+
 // Render Events
 function renderEventsEditList(events) {
   const container = document.getElementById('events-edit-list');
@@ -722,7 +776,7 @@ function renderEventsEditList(events) {
   container.innerHTML = events.map((evt, idx) => `
     <div class="item-box" data-event-idx="${idx}">
       <div class="item-box-top">
-        <span class="item-box-title">Acara #${idx + 1}: ${evt.title}</span>
+        <span class="item-box-title">Acara #${idx + 1}: ${escapeAdminAttr(evt.title || 'Acara Baru')}</span>
         <button type="button" class="btn btn-danger btn-sm" onclick="removeEventItem(${idx})">
           <i class="fa-solid fa-trash-can"></i> Hapus Acara
         </button>
@@ -730,31 +784,41 @@ function renderEventsEditList(events) {
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Nama Acara</label>
-          <input type="text" class="form-control evt-title" value="${evt.title || ''}">
+          <input type="text" class="form-control evt-title" value="${escapeAdminAttr(evt.title || '')}" placeholder="Contoh: Akad Nikah / Resepsi">
         </div>
         <div class="form-group">
           <label class="form-label">Label / Badge</label>
-          <input type="text" class="form-control evt-badge" value="${evt.badge || ''}" placeholder="Contoh: Sakral & Intimate">
+          <input type="text" class="form-control evt-badge" value="${escapeAdminAttr(evt.badge || '')}" placeholder="Contoh: Sakral & Intimate">
         </div>
         <div class="form-group">
-          <label class="form-label">Hari & Tanggal</label>
-          <input type="text" class="form-control evt-dateFormatted" value="${evt.dateFormatted || ''}" placeholder="20 Desember 2026">
+          <label class="form-label">Hari Acara</label>
+          <input type="text" class="form-control evt-dayName" value="${escapeAdminAttr(evt.dayName || 'Minggu')}" placeholder="Contoh: Minggu / Jumat">
         </div>
         <div class="form-group">
+          <label class="form-label">Tanggal Acara</label>
+          <input type="text" class="form-control evt-dateFormatted" value="${escapeAdminAttr(evt.dateFormatted || '')}" placeholder="20 Desember 2026">
+        </div>
+        <div class="form-group col-span-2">
           <label class="form-label">Waktu / Jam</label>
-          <input type="text" class="form-control evt-time" value="${evt.time || ''}" placeholder="08.00 - 10.00 WIB">
+          <input type="text" class="form-control evt-time" value="${escapeAdminAttr(evt.time || '')}" placeholder="08.00 - 10.00 WIB">
         </div>
         <div class="form-group col-span-2">
           <label class="form-label">Nama Gedung / Tempat</label>
-          <input type="text" class="form-control evt-venue" value="${evt.venue || ''}" placeholder="Grand Ballroom Hotel...">
+          <input type="text" class="form-control evt-venue" value="${escapeAdminAttr(evt.venue || '')}" placeholder="Grand Ballroom Hotel...">
         </div>
         <div class="form-group col-span-2">
           <label class="form-label">Alamat Lengkap</label>
-          <textarea class="form-control evt-address" placeholder="Jalan, kelurahan, kecamatan, kota...">${evt.address || ''}</textarea>
+          <textarea class="form-control evt-address" placeholder="Jalan, kelurahan, kecamatan, kota...">${escapeAdminAttr(evt.address || '')}</textarea>
         </div>
         <div class="form-group col-span-2">
-          <label class="form-label">Link Navigasi Google Maps</label>
-          <input type="text" class="form-control evt-mapsUrl" value="${evt.mapsUrl || ''}">
+          <label class="form-label">Link Navigasi Google Maps (URL / Link Berbagi)</label>
+          <input type="text" class="form-control evt-mapsUrl" value="${escapeAdminAttr(evt.mapsUrl || '')}" placeholder="https://maps.google.com/...">
+          <span class="form-hint">Tautan yang terbuka saat tamu mengklik tombol 'Buka Petunjuk Arah'</span>
+        </div>
+        <div class="form-group col-span-2">
+          <label class="form-label">Kode Semat Peta (Embed Google Maps / Iframe)</label>
+          <input type="text" class="form-control evt-mapsEmbedUrl" value="${escapeAdminAttr(evt.mapsEmbedUrl || '')}" placeholder="Tempel URL embed atau kode &lt;iframe src=&quot;...&quot;&gt;">
+          <span class="form-hint">Digunakan saat tamu mengklik 'Lihat Denah Lokasi'. Sistem otomatis mengekstrak jika Anda menempelkan kode iframe.</span>
         </div>
       </div>
     </div>
@@ -771,17 +835,23 @@ function getEventsFromDOM() {
   const boxes = document.querySelectorAll('#events-edit-list .item-box');
   const result = [];
   boxes.forEach((box, i) => {
+    const rawMapsUrl = (box.querySelector('.evt-mapsUrl')?.value || '').trim();
+    const rawMapsEmbed = (box.querySelector('.evt-mapsEmbedUrl')?.value || '').trim();
+    const venue = (box.querySelector('.evt-venue')?.value || '').trim();
+    const address = (box.querySelector('.evt-address')?.value || '').trim();
+    const parsed = parseMapUrls(rawMapsUrl, rawMapsEmbed, venue, address);
+
     result.push({
       id: 'acara-' + i,
-      title: box.querySelector('.evt-title')?.value || '',
-      badge: box.querySelector('.evt-badge')?.value || '',
-      dayName: 'Minggu',
-      dateFormatted: box.querySelector('.evt-dateFormatted')?.value || '',
-      time: box.querySelector('.evt-time')?.value || '',
-      venue: box.querySelector('.evt-venue')?.value || '',
-      address: box.querySelector('.evt-address')?.value || '',
-      mapsUrl: box.querySelector('.evt-mapsUrl')?.value || 'https://maps.google.com',
-      mapsEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.360875471801!2d106.79633637586884!3d-6.216047360882654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f14d86b62057%3A0x6335a96ca2608447!2sHotel%20Mulia%20Senayan%2C%20Jakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid'
+      title: box.querySelector('.evt-title')?.value.trim() || '',
+      badge: box.querySelector('.evt-badge')?.value.trim() || '',
+      dayName: box.querySelector('.evt-dayName')?.value.trim() || 'Minggu',
+      dateFormatted: box.querySelector('.evt-dateFormatted')?.value.trim() || '',
+      time: box.querySelector('.evt-time')?.value.trim() || '',
+      venue: venue,
+      address: address,
+      mapsUrl: parsed.navUrl,
+      mapsEmbedUrl: parsed.embedUrl
     });
   });
   return result;
@@ -938,7 +1008,7 @@ function renderBankEditList(banks) {
   container.innerHTML = banks.map((item, idx) => `
     <div class="item-box">
       <div class="item-box-top">
-        <span class="item-box-title">Rekening #${idx + 1}: ${item.badge || item.bank}</span>
+        <span class="item-box-title">Rekening #${idx + 1}: ${escapeAdminAttr(item.badge || item.bank || 'Bank')}</span>
         <button type="button" class="btn btn-danger btn-sm" onclick="removeBankItem(${idx})">
           <i class="fa-solid fa-trash-can"></i> Hapus
         </button>
@@ -946,15 +1016,15 @@ function renderBankEditList(banks) {
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Nama Bank / Dompet Digital</label>
-          <input type="text" class="form-control bank-badge" value="${item.badge || item.bank || ''}" placeholder="Contoh: Bank BCA / Mandiri / Dana">
+          <input type="text" class="form-control bank-badge" value="${escapeAdminAttr(item.badge || item.bank || '')}" placeholder="Contoh: Bank BCA / Mandiri / Dana">
         </div>
         <div class="form-group">
           <label class="form-label">Nomor Rekening</label>
-          <input type="text" class="form-control bank-accNum" value="${item.accountNumber || ''}" placeholder="Contoh: 8415291039">
+          <input type="text" class="form-control bank-accNum" value="${escapeAdminAttr(item.accountNumber || '')}" placeholder="Contoh: 8415291039">
         </div>
         <div class="form-group col-span-2">
           <label class="form-label">Atas Nama (Pemilik Rekening)</label>
-          <input type="text" class="form-control bank-accName" value="${item.accountName || ''}" placeholder="Contoh: Raden Arya Pratama">
+          <input type="text" class="form-control bank-accName" value="${escapeAdminAttr(item.accountName || '')}" placeholder="Contoh: Raden Arya Pratama">
         </div>
       </div>
     </div>
@@ -972,10 +1042,10 @@ function getBanksFromDOM() {
   const result = [];
   boxes.forEach(box => {
     result.push({
-      bank: box.querySelector('.bank-badge')?.value || 'BANK',
-      badge: box.querySelector('.bank-badge')?.value || 'Bank',
-      accountNumber: box.querySelector('.bank-accNum')?.value || '',
-      accountName: box.querySelector('.bank-accName')?.value || '',
+      bank: (box.querySelector('.bank-badge')?.value || 'BANK').trim(),
+      badge: (box.querySelector('.bank-badge')?.value || 'Bank').trim(),
+      accountNumber: (box.querySelector('.bank-accNum')?.value || '').trim(),
+      accountName: (box.querySelector('.bank-accName')?.value || '').trim(),
       logoColor: '#005596'
     });
   });
