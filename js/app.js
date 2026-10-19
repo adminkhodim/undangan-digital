@@ -68,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
             initGifts();
           } catch (err) {}
         }
+        if (res && res.statusUser) {
+          renderPreviewModeBadge(res.statusUser, res.paket);
+        }
       })
       .catch(() => {});
   }
@@ -1066,4 +1069,30 @@ function initScrollSpy() {
       isTicking = true;
     }
   }, { passive: true });
+}
+
+/* ====================================================================
+   14. PREVIEW MODE BADGE (STATUS: MENUNGGU PEMBAYARAN)
+   ==================================================================== */
+function renderPreviewModeBadge(statusUser, planName) {
+  const isPending = (statusUser && (
+    statusUser.toLowerCase().includes('menunggu') || 
+    statusUser.toLowerCase().includes('pending') || 
+    statusUser.toLowerCase().includes('belum')
+  ));
+
+  const existingBadge = document.getElementById('preview-mode-banner');
+  if (isPending) {
+    if (existingBadge) return;
+    const badge = document.createElement('div');
+    badge.id = 'preview-mode-banner';
+    badge.className = 'preview-mode-banner';
+    badge.innerHTML = `
+      <i class="fa-solid fa-eye"></i>
+      <span>Mode Pratinjau Undangan — Menunggu Aktivasi Pembayaran (${planName || 'Paket Gold'})</span>
+    `;
+    document.body.appendChild(badge);
+  } else {
+    if (existingBadge) existingBadge.remove();
+  }
 }

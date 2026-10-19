@@ -44,6 +44,8 @@ function doGet(e) {
         status: 'success',
         tenant: tenantInfo.slug || CONFIG.DEFAULT_SLUG,
         namaPasangan: tenantInfo.namaPasangan || '',
+        statusUser: tenantInfo.status || 'Aktif',
+        paket: tenantInfo.paket || 'Paket Gold',
         config: configData
       });
     }
@@ -56,7 +58,9 @@ function doGet(e) {
         status: 'success',
         verified: isPinValid,
         slug: tenantInfo.slug,
-        namaPasangan: tenantInfo.namaPasangan || ''
+        namaPasangan: tenantInfo.namaPasangan || '',
+        statusUser: tenantInfo.status || 'Aktif',
+        paket: tenantInfo.paket || 'Paket Gold'
       });
     }
 
@@ -193,8 +197,8 @@ function doPost(e) {
       var whatsapp = postData.whatsapp || '';
       var pin = postData.pin || '123456';
       var weddingDate = postData.weddingDate || '2026-12-20';
-      var paket = postData.paket || 'VIP Digital Gold';
-      var statusUser = 'Aktif';
+      var paket = postData.paket || 'Paket Gold';
+      var statusUser = 'Menunggu Pembayaran';
 
       var newUserId = 'USR-' + Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyMM') + '-' + Math.floor(100 + Math.random() * 900);
       var regDate = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm:ss');
@@ -279,7 +283,9 @@ function doPost(e) {
           spreadsheetId: clientSsId,
           driveFolderId: clientFolderId,
           adminUrl: 'admin.html?u=' + newSlug,
-          guestUrl: 'index.html?u=' + newSlug
+          guestUrl: 'index.html?u=' + newSlug,
+          statusUser: statusUser,
+          paket: paket
         }
       });
     }
@@ -309,6 +315,8 @@ function getTenantInfo(masterSs, slug) {
     slug: CONFIG.DEFAULT_SLUG,
     namaPasangan: 'Raden Arya & Annisa Larasati',
     pin: '123456',
+    paket: 'Paket Gold',
+    status: 'Aktif',
     spreadsheetId: masterSs.getId(),
     driveFolderId: CONFIG.DRIVE_FOLDER_ID
   };

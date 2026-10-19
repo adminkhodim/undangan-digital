@@ -170,6 +170,32 @@
     <!-- CONTENT PANES -->
     <main class="admin-content">
 
+      <!-- Payment Notice Banner: Tampil jika status tenant Menunggu Pembayaran -->
+      <div id="payment-notice-banner" class="payment-notice-banner" style="display: none;">
+        <div class="payment-notice-left">
+          <div class="payment-notice-icon">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div class="payment-notice-body">
+            <div class="payment-notice-header">
+              <strong class="payment-notice-title">Status: Menunggu Konfirmasi Pembayaran</strong>
+              <span class="payment-plan-pill" id="payment-banner-plan">Paket Gold</span>
+            </div>
+            <p class="payment-notice-desc">
+              Undangan Anda berada dalam <strong>Mode Pratinjau</strong>. Segera lakukan pembayaran dan konfirmasi via WhatsApp agar seluruh fitur dapat aktif penuh dan siap disebarkan.
+            </p>
+          </div>
+        </div>
+        <div class="payment-notice-actions">
+          <button type="button" class="btn-notice-bank" onclick="openPaymentAccountModal()">
+            <i class="fa-solid fa-credit-card"></i> Lihat Rekening
+          </button>
+          <a href="#" id="payment-banner-wa-btn" target="_blank" class="btn-notice-wa">
+            <i class="fa-brands fa-whatsapp"></i> Konfirmasi Pembayaran
+          </a>
+        </div>
+      </div>
+
       <!-- ==============================================================
            TAB 1: DATA MEMPELAI
            ============================================================== -->
@@ -939,6 +965,79 @@
             <i class="fa-solid fa-wand-magic-sparkles"></i> Buat Undangan Baru Sekarang
           </a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rekening Pembayaran Resmi -->
+  <div id="payment-account-modal" class="auth-modal-backdrop">
+    <div class="auth-modal-card">
+      <div class="auth-modal-glow"></div>
+      
+      <div class="auth-icon-badge" style="background: linear-gradient(135deg, #FFE8B2 0%, #D4AF37 50%, #997A15 100%);">
+        <i class="fa-solid fa-credit-card"></i>
+      </div>
+
+      <h2 class="auth-modal-title">Rekening Pembayaran</h2>
+      <p class="auth-modal-desc">
+        Silakan transfer sesuai paket Anda ke salah satu rekening resmi berikut:
+      </p>
+
+      <div class="admin-bank-list-box">
+        <div class="admin-bank-item">
+          <div class="admin-bank-meta">
+            <span class="admin-bank-name">Bank BCA</span>
+            <span class="admin-bank-num">4620831871</span>
+          </div>
+          <button type="button" class="btn-copy-bank" onclick="copyAdminBankText('4620831871', this)">
+            <i class="fa-regular fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <div class="admin-bank-item">
+          <div class="admin-bank-meta">
+            <span class="admin-bank-name">Bank Mandiri</span>
+            <span class="admin-bank-num">1840013737273</span>
+          </div>
+          <button type="button" class="btn-copy-bank" onclick="copyAdminBankText('1840013737273', this)">
+            <i class="fa-regular fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <div class="admin-bank-item">
+          <div class="admin-bank-meta">
+            <span class="admin-bank-name">SeaBank</span>
+            <span class="admin-bank-num">901899615519</span>
+          </div>
+          <button type="button" class="btn-copy-bank" onclick="copyAdminBankText('901899615519', this)">
+            <i class="fa-regular fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <div class="admin-bank-item">
+          <div class="admin-bank-meta">
+            <span class="admin-bank-name">DANA / e-Wallet</span>
+            <span class="admin-bank-num">089602807020</span>
+          </div>
+          <button type="button" class="btn-copy-bank" onclick="copyAdminBankText('089602807020', this)">
+            <i class="fa-regular fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <div class="admin-bank-holder">
+          <span>Atas Nama:</span>
+          <strong>Nazirul Muhammad</strong>
+        </div>
+      </div>
+
+      <div class="auth-action-buttons">
+        <a href="#" id="modal-bank-wa-btn" target="_blank" class="btn-notice-wa" style="width: 100%; justify-content: center;">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Kirim Bukti Pembayaran via WhatsApp</span>
+        </a>
+        <button type="button" class="btn btn-outline-secondary" onclick="closePaymentAccountModal()">
+          <span>Tutup</span>
+        </button>
       </div>
     </div>
   </div>

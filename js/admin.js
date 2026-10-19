@@ -179,6 +179,9 @@ async function handlePinSubmit(e) {
       if (data && data.status === 'success' && data.verified) {
         verified = true;
         if (data.namaPasangan) coupleName = data.namaPasangan;
+        if (data.statusUser) {
+          renderPaymentNoticeBanner(data.statusUser, data.paket);
+        }
       }
     } else {
       // Fallback offline
@@ -421,11 +424,16 @@ function loadConfig() {
     fetch(`${WEDDING_CONFIG.appsScriptUrl}?action=get_config${tenantParam}`)
       .then(res => res.json())
       .then(resJson => {
-        if (resJson && resJson.status === 'success' && resJson.config) {
-          currentConfig = resJson.config;
-          localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(currentConfig));
-          populateForm(currentConfig);
-          console.log('[Admin] Konfigurasi cloud dari Google Sheets berhasil dimuat');
+        if (resJson && resJson.status === 'success') {
+          if (resJson.config) {
+            currentConfig = resJson.config;
+            localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(currentConfig));
+            populateForm(currentConfig);
+            console.log('[Admin] Konfigurasi cloud dari Google Sheets berhasil dimuat');
+          }
+          if (resJson.statusUser) {
+            renderPaymentNoticeBanner(resJson.statusUser, resJson.paket);
+          }
         }
       })
       .catch(err => {
@@ -433,6 +441,69 @@ function loadConfig() {
       });
   }
 }
+
+/* ====================================================================
+   2b. PAYMENT GATEKEEPING & BANNER HANDLERS
+   ==================================================================== */
+function renderPaymentNoticeBanner(statusUser, planName) {
+  const banner = document.getElementById('payment-notice-banner');
+  if (!banner) return;
+
+  const isPending = (statusUser && (
+    statusUser.toLowerCase().includes('menunggu') || 
+    statusUser.toLowerCase().includes('pending') || 
+    statusUser.toLowerCase().includes('belum')
+  ));
+  
+  if (isPending) {
+    banner.style.display = 'flex';
+    const planPill = document.getElementById('payment-banner-plan');
+    if (planPill) planPill.textContent = planName || 'Paket Gold';
+
+    const activeSlug = tenantSlug || 'undangan-saya';
+    const waMsg = `Halo Admin Khodim Undangan, saya ingin konfirmasi pembayaran untuk undangan ${activeSlug} (${planName || 'Paket Gold'}). Mohon diverifikasi agar fitur aktif penuh. Terima kasih!`;
+    const waUrl = `https://wa.me/6285385515582?text=${encodeURIComponent(waMsg)}`;
+
+    const bannerWaBtn = document.getElementById('payment-banner-wa-btn');
+    if (bannerWaBtn) bannerWaBtn.href = waUrl;
+
+    const modalBankWaBtn = document.getElementById('modal-bank-wa-btn');
+    if (modalBankWaBtn) modalBankWaBtn.href = waUrl;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+window.openPaymentAccountModal = function() {
+  const modal = document.getElementById('payment-account-modal');
+  if (modal) {
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+window.closePaymentAccountModal = function() {
+  const modal = document.getElementById('payment-account-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+};
+
+window.copyAdminBankText = function(text, btnEl) {
+  navigator.clipboard.writeText(text).then(() => {
+    const originalHtml = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin!';
+    btnEl.style.background = '#2E7D32';
+    btnEl.style.color = '#fff';
+    showAdminToast(`Nomor rekening ${text} berhasil disalin!`, 'success');
+    setTimeout(() => {
+      btnEl.innerHTML = originalHtml;
+      btnEl.style.background = '';
+      btnEl.style.color = '';
+    }, 2000);
+  });
+};
 
 function populateForm(cfg) {
   if (!cfg) return;
