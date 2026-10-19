@@ -298,7 +298,7 @@ function initRegistrationSubmit() {
         if (planPriceEl) planPriceEl.textContent = plan.priceFormatted;
 
         // Generate tautan WhatsApp Konfirmasi Otomatis
-        const adminWa = '6281234567890';
+        const adminWa = '6285385515582';
         const waMsg = `Halo Admin Khodim Undangan, saya telah mendaftar website undangan digital:\n\n` +
           `💍 *Nama Pasangan:* ${groom} & ${bride}\n` +
           `📦 *Paket Dipilih:* ${plan.name} (${plan.priceFormatted})\n` +
