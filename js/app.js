@@ -765,13 +765,17 @@ function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
   let navUrl = (rawUrl || '').toString().trim();
   let embedUrl = (rawEmbedUrl || '').toString().trim();
 
-  // 1. Ekstrak src jika navUrl atau embedUrl berisi tag <iframe>
+  // Jika navUrl berisi tag <iframe>
   if (navUrl.includes('<iframe') || navUrl.includes('src=')) {
     const srcMatch = navUrl.match(/src=["']([^"']+)["']/i);
     if (srcMatch && srcMatch[1]) {
       embedUrl = srcMatch[1];
     }
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
   }
+
+  // Jika embedUrl berisi tag <iframe>
   if (embedUrl.includes('<iframe') || embedUrl.includes('src=')) {
     const srcMatch = embedUrl.match(/src=["']([^"']+)["']/i);
     if (srcMatch && srcMatch[1]) {
@@ -779,60 +783,23 @@ function parseMapUrls(rawUrl, rawEmbedUrl, venue, address) {
     }
   }
 
-  // 2. Deteksi koordinat dari navUrl atau embedUrl
-  // Pola 1: /@-6.79425,110.6150278
-  // Pola 2: !3d-6.79425!4d110.6150278
-  // Pola 3: ?q=-6.79425,110.6150278 atau &query=-6.79425,110.6150278
-  let coords = '';
-  const matchAt = navUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  const matchBang = navUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-  const matchQ = navUrl.match(/[?&](?:q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-
-  if (matchAt) {
-    coords = `${matchAt[1]},${matchAt[2]}`;
-  } else if (matchBang) {
-    coords = `${matchBang[1]},${matchBang[2]}`;
-  } else if (matchQ) {
-    coords = `${matchQ[1]},${matchQ[2]}`;
+  // Jika embedUrl belum ada tapi navUrl adalah url embed
+  if (!embedUrl && navUrl.includes('/maps/embed')) {
+    embedUrl = navUrl;
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
   }
 
-  // 3. Deteksi apakah embedUrl masih memuat data demo default Hotel Mulia Senayan Jakarta
-  const isDemoMuliaEmbed = embedUrl.includes('Hotel%20Mulia') || embedUrl.includes('Hotel+Mulia') || embedUrl.includes('Hotel Mulia') || embedUrl.includes('106.796336');
-  const isActualMulia = (venue && venue.toLowerCase().includes('mulia')) || (address && address.toLowerCase().includes('mulia'));
-
-  if (isDemoMuliaEmbed && !isActualMulia) {
-    embedUrl = ''; // Buang embed default demo yang tertinggal
+  // Fallback jika navUrl kosong
+  if (!navUrl) {
+    const query = [venue, address].filter(Boolean).join(', ');
+    navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
   }
 
-  // 4. Jika embedUrl bukan URL embed Google Maps yang valid (misal user menempel link biasa ke kolom embed)
-  if (embedUrl && !embedUrl.includes('/maps/embed') && !embedUrl.includes('output=embed')) {
-    const mEmbedCoords = embedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || embedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (mEmbedCoords) {
-      coords = `${mEmbedCoords[1]},${mEmbedCoords[2]}`;
-    }
-    embedUrl = '';
-  }
-
-  // 5. Buat URL Embed dinamis jika embedUrl kosong
+  // Fallback jika embedUrl kosong
   if (!embedUrl) {
-    if (coords) {
-      embedUrl = `https://maps.google.com/maps?q=${coords}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-    } else {
-      const query = [venue, address].filter(Boolean).join(', ');
-      if (query) {
-        embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-      }
-    }
-  }
-
-  // 6. Normalisasi navUrl
-  if (!navUrl || navUrl.includes('<iframe')) {
-    if (coords) {
-      navUrl = `https://www.google.com/maps/search/?api=1&query=${coords}`;
-    } else {
-      const query = [venue, address].filter(Boolean).join(', ');
-      navUrl = query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : 'https://maps.google.com';
-    }
+    const query = [venue, address].filter(Boolean).join(', ');
+    embedUrl = query ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
   }
 
   return { navUrl, embedUrl };
@@ -1163,11 +1130,24 @@ function initRSVP() {
   const tenantSlug = urlParams.get('u') || urlParams.get('slug') || '';
   const tenantWishesKey = tenantSlug ? `wedding_wishes_${tenantSlug}` : 'wedding_wishes_arya_annisa';
 
-  // 1. Tampilkan data dari cache lokal / initialWishes langsung (tanpa loading delay)
+  // 1. Tampilkan data dari cache lokal (hanya gunakan initialWishes jika BUKAN tenant)
   let storedWishes = JSON.parse(localStorage.getItem(tenantWishesKey));
-  if (!storedWishes || !Array.isArray(storedWishes) || storedWishes.length === 0) {
-    storedWishes = WEDDING_CONFIG.initialWishes || [];
-    localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
+  if (!storedWishes || !Array.isArray(storedWishes)) {
+    if (!tenantSlug) {
+      storedWishes = WEDDING_CONFIG.initialWishes || [];
+      localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
+    } else {
+      storedWishes = [];
+    }
+  }
+
+  // Jika ini tenant multi-tenant tapi cache lokal masih berisi mock data Arya & Annisa dari versi lama, bersihkan!
+  if (tenantSlug && Array.isArray(storedWishes)) {
+    const hasMock = storedWishes.some(w => (w.name && w.name.includes('Dimas')) || (w.message && w.message.includes('Arya')));
+    if (hasMock) {
+      storedWishes = [];
+      localStorage.removeItem(tenantWishesKey);
+    }
   }
 
   renderWishes(storedWishes);
@@ -1178,7 +1158,7 @@ function initRSVP() {
     fetch(`${WEDDING_CONFIG.appsScriptUrl}${tenantParam}`)
       .then(res => res.json())
       .then(result => {
-        if (result && result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
+        if (result && result.status === 'success' && Array.isArray(result.data)) {
           storedWishes = result.data;
           localStorage.setItem(tenantWishesKey, JSON.stringify(storedWishes));
           renderWishes(storedWishes);
@@ -1274,9 +1254,21 @@ function renderWishes(wishes) {
   if (!container) return;
 
   const countEl = document.getElementById('wishes-count');
-  if (countEl) countEl.textContent = `(${wishes.length})`;
+  const wishList = Array.isArray(wishes) ? wishes : [];
+  if (countEl) countEl.textContent = `(${wishList.length})`;
 
-  container.innerHTML = wishes.map((item) => {
+  if (wishList.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2.2rem 1.2rem; color: var(--text-muted); font-size: 0.9rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-gold);">
+        <i class="fa-regular fa-comments text-gold" style="font-size: 2rem; margin-bottom: 0.6rem; display: block;"></i>
+        <p style="margin: 0; font-weight: 600; color: var(--text-dark);">Belum ada ucapan &amp; doa restu</p>
+        <span style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-top: 4px;">Jadilah yang pertama mengirimkan doa restu untuk kedua mempelai di atas!</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = wishList.map((item) => {
     let statusText = 'Hadir';
     let statusClass = 'hadir';
     if (item.status === 'tidak-hadir') {
@@ -1294,12 +1286,12 @@ function renderWishes(wishes) {
         <div class="wish-header">
           <div class="wish-author">
             <div class="wish-avatar">${firstLetter}</div>
-            <span>${item.name}</span>
+            <span>${escapeHtml(item.name || 'Tamu Undangan')}</span>
           </div>
           <span class="wish-badge ${statusClass}">${statusText}</span>
         </div>
-        <p class="wish-message">${escapeHtml(item.message)}</p>
-        <span class="wish-time">${item.time}</span>
+        <p class="wish-message">${escapeHtml(item.message || '')}</p>
+        <span class="wish-time">${escapeHtml(item.time || item.timestamp || 'Baru saja')}</span>
       </div>
     `;
   }).join('');
